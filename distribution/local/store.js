@@ -21,22 +21,24 @@ const defaultCallback = (e, v) => e ? console.error(e) : console.log(v);
 
 const nodeDir = path.join(__dirname, '../../store', global.moreStatus.sid);
 
-fs.mkdir(nodeDir,
-    {recursive: true}, (err) => {
-      if (err) throw err;
-    });
+fs.mkdirSync(nodeDir, { recursive: true });
 
-store.get = function(key, cb = defaultCallback) {
+store.get = function (conf, cb = defaultCallback) {
+  let key = conf.key || null;
+  let gid = conf.gid || 'local';
+  let col = conf.col || 'default';
+  let dir = path.join(nodeDir, gid, col);
   if (!key) {
     try {
-      let files = fs.readdirSync(nodeDir);
+      let files = fs.readdirSync(dir);
       cb(null, files);
     } catch (err) {
       cb(new Error('store.get ' + err.toString()), null);
     }
   } else {
     try {
-      let data = fs.readFileSync(path.join(nodeDir, key));
+      let data = fs.readFileSync(path.join(dir, key));
+      console.log("HERE", path.join(dir, key));
       cb(null, serialization.deserialize(data));
     } catch (err) {
       cb(new Error('store.get ' + err.toString()), null);
@@ -44,23 +46,31 @@ store.get = function(key, cb = defaultCallback) {
   }
 };
 
-store.put = function(obj, key, cb = defaultCallback) {
+store.put = function (obj, conf, cb = defaultCallback) {
+  let key = conf.key || null;
+  let gid = conf.gid || 'local';
+  let col = conf.col || 'default';
+  let dir = path.join(nodeDir, gid, col);
   if (!key) {
     key = id.getID(obj);
   }
   try {
-    fs.writeFileSync(path.join(nodeDir, key), serialization.serialize(obj));
+    fs.writeFileSync(path.join(dir, key), serialization.serialize(obj));
     cb(null, obj);
   } catch (err) {
     cb(new Error('store.put ' + err.toString()), null);
   }
 };
 
-store.del = function(key, cb = defaultCallback) {
+store.del = function (conf, cb = defaultCallback) {
+  let key = conf.key || null;
+  let gid = conf.gid || 'local';
+  let col = conf.col || 'default';
+  let dir = path.join(nodeDir, gid, col, key);
   try {
-    let data = fs.readFileSync(path.join(nodeDir, key));
+    let data = fs.readFileSync(dir);
     try {
-      fs.rm(path.join(nodeDir, key));
+      fs.rmSync(dir);
       cb(null, serialization.deserialize(data));
     } catch (err) {
       cb(new Error('store.del ' + err.toString()), null);

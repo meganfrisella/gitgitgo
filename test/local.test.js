@@ -1,4 +1,4 @@
-const {oracle} = require('./oracle');
+const { oracle } = require('./oracle');
 const fs = require('fs');
 const path = require('path');
 
@@ -198,7 +198,7 @@ test('(8 pts) local.routes.put/get(echo)', (done) => {
 // ---COMM---
 
 test('(10 pts) local.comm(status.get(nid))', (done) => {
-  remote = {node: node, service: 'status', method: 'get'};
+  remote = { node: node, service: 'status', method: 'get' };
   message = [
     'nid', // configuration
   ];
@@ -225,7 +225,7 @@ test('(9 pts) RPC1', (done) => {
   };
 
   const addOneRPC = distribution.util.wire.createRPC(
-      distribution.util.wire.toAsync(addOne));
+    distribution.util.wire.toAsync(addOne));
 
   const rpcService = {
     addOneRPC: addOneRPC,
@@ -288,8 +288,8 @@ test('(2 pts) local.groups.del(random)', (done) => {
 
 test('(2 pts) local.groups.put(browncs)', (done) => {
   let g = {
-    '507aa': {ip: '127.0.0.1', port: 8080},
-    '12ab0': {ip: '127.0.0.1', port: 8081},
+    '507aa': { ip: '127.0.0.1', port: 8080 },
+    '12ab0': { ip: '127.0.0.1', port: 8081 },
   };
 
   distribution.local.groups.put('browncs', g, (e, v) => {
@@ -305,8 +305,8 @@ test('(2 pts) local.groups.put(browncs)', (done) => {
 
 test('(2 pts) local.groups.put/get(browncs)', (done) => {
   let g = {
-    '507aa': {ip: '127.0.0.1', port: 8080},
-    '12ab0': {ip: '127.0.0.1', port: 8081},
+    '507aa': { ip: '127.0.0.1', port: 8080 },
+    '12ab0': { ip: '127.0.0.1', port: 8081 },
   };
 
   distribution.local.groups.put('browncs', g, (e, v) => {
@@ -324,8 +324,8 @@ test('(2 pts) local.groups.put/get(browncs)', (done) => {
 
 test('(2 pts) local.groups.put/get/del(browncs)', (done) => {
   let g = {
-    '507aa': {ip: '127.0.0.1', port: 8080},
-    '12ab0': {ip: '127.0.0.1', port: 8081},
+    '507aa': { ip: '127.0.0.1', port: 8080 },
+    '12ab0': { ip: '127.0.0.1', port: 8081 },
   };
 
   distribution.local.groups.put('browncs', g, (e, v) => {
@@ -345,8 +345,8 @@ test('(2 pts) local.groups.put/get/del(browncs)', (done) => {
 
 test('(2 pts) local.groups.put/get/del/get(browncs)', (done) => {
   let g = {
-    '507aa': {ip: '127.0.0.1', port: 8080},
-    '12ab0': {ip: '127.0.0.1', port: 8081},
+    '507aa': { ip: '127.0.0.1', port: 8080 },
+    '12ab0': { ip: '127.0.0.1', port: 8081 },
   };
 
   distribution.local.groups.put('browncs', g, (e, v) => {
@@ -369,16 +369,16 @@ test('(2 pts) local.groups.put/get/del/get(browncs)', (done) => {
 
 test('(2 pts) local.groups.put(dummy)/add(n1)/get(dummy)', (done) => {
   const g = {
-    '507aa': {ip: '127.0.0.1', port: 8080},
-    '12ab0': {ip: '127.0.0.1', port: 8081},
+    '507aa': { ip: '127.0.0.1', port: 8080 },
+    '12ab0': { ip: '127.0.0.1', port: 8081 },
   };
 
   distribution.local.groups.put('dummy', g, (e, v) => {
-    const n1 = {ip: '127.0.0.1', port: 8082};
+    const n1 = { ip: '127.0.0.1', port: 8082 };
 
     distribution.local.groups.add('dummy', n1, (e, v) => {
       const expectedGroup = {
-        ...g, ...{[id.getSID(n1)]: n1},
+        ...g, ...{ [id.getSID(n1)]: n1 },
       };
 
       distribution.local.groups.get('dummy', (e, v) => {
@@ -396,14 +396,14 @@ test('(2 pts) local.groups.put(dummy)/add(n1)/get(dummy)', (done) => {
 
 test('(2 pts) local.groups.put(dummy)/rem(n1)/get(dummy)', (done) => {
   const g = {
-    '507aa': {ip: '127.0.0.1', port: 8080},
-    '12ab0': {ip: '127.0.0.1', port: 8081},
+    '507aa': { ip: '127.0.0.1', port: 8080 },
+    '12ab0': { ip: '127.0.0.1', port: 8081 },
   };
 
   distribution.local.groups.put('dummy', g, (e, v) => {
     distribution.local.groups.rem('dummy', '507aa', (e, v) => {
       const expectedGroup = {
-        '12ab0': {ip: '127.0.0.1', port: 8081},
+        '12ab0': { ip: '127.0.0.1', port: 8081 },
       };
 
       distribution.local.groups.get('dummy', (e, v) => {
@@ -452,7 +452,7 @@ test('(0.5 pts) local.mem.del(jcarb)', (done) => {
 });
 
 test('(0.5 pts) local.mem.put(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbmp';
 
   distribution.local.mem.put(user, key, (e, v) => {
@@ -467,7 +467,7 @@ test('(0.5 pts) local.mem.put(jcarb)', (done) => {
 });
 
 test('(0.5 pts) local.mem.put/get(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbmpg';
 
   distribution.local.mem.put(user, key, (e, v) => {
@@ -484,7 +484,7 @@ test('(0.5 pts) local.mem.put/get(jcarb)', (done) => {
 });
 
 test('(0.5 pts) local.mem.put/del(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbmpd';
 
   distribution.local.mem.put(user, key, (e, v) => {
@@ -501,7 +501,7 @@ test('(0.5 pts) local.mem.put/del(jcarb)', (done) => {
 });
 
 test('(0.5 pts) local.mem.put/del/get(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbmpdg';
 
   distribution.local.mem.put(user, key, (e, v) => {
@@ -521,9 +521,9 @@ test('(0.5 pts) local.mem.put/del/get(jcarb)', (done) => {
 
 test('(2 pts) local.mem.get(no key)', (done) => {
   const users = [
-    {first: 'Emma', last: 'Watson'},
-    {first: 'John', last: 'Krasinski'},
-    {first: 'Julie', last: 'Bowen'},
+    { first: 'Emma', last: 'Watson' },
+    { first: 'John', last: 'Krasinski' },
+    { first: 'Julie', last: 'Bowen' },
   ];
   const keys = [
     'ewatson',
@@ -549,7 +549,7 @@ test('(2 pts) local.mem.get(no key)', (done) => {
 });
 
 test('(0.5 pts) local.mem.put(no key)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
 
   distribution.local.mem.put(user, null, (e, v) => {
     distribution.local.mem.get(id.getID(user), (e, v) => {
@@ -570,7 +570,7 @@ test('(0.5 pts) local.mem.put(no key)', (done) => {
 test('(0.5 pts) local.store.get(jcarb)', (done) => {
   const key = 'jcarbsg';
 
-  distribution.local.store.get(key, (e, v) => {
+  distribution.local.store.get({ key: key }, (e, v) => {
     try {
       expect(e).toBeInstanceOf(Error);
       expect(v).toBeFalsy();
@@ -584,7 +584,7 @@ test('(0.5 pts) local.store.get(jcarb)', (done) => {
 test('(0.5 pts) local.store.del(jcarb)', (done) => {
   const key = 'jcarbsd';
 
-  distribution.local.store.del(key, (e, v) => {
+  distribution.local.store.del({ key: key }, (e, v) => {
     try {
       expect(e).toBeInstanceOf(Error);
       expect(v).toBeFalsy();
@@ -596,10 +596,10 @@ test('(0.5 pts) local.store.del(jcarb)', (done) => {
 });
 
 test('(0.5 pts) local.store.put(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbsp';
 
-  distribution.local.store.put(user, key, (e, v) => {
+  distribution.local.store.put(user, { key: key }, (e, v) => {
     try {
       expect(e).toBeFalsy();
       expect(v).toBe(user);
@@ -611,11 +611,11 @@ test('(0.5 pts) local.store.put(jcarb)', (done) => {
 });
 
 test('(0.5 pts) local.store.put/get(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbspg';
 
-  distribution.local.store.put(user, key, (e, v) => {
-    distribution.local.store.get(key, (e, v) => {
+  distribution.local.store.put(user, { key: key }, (e, v) => {
+    distribution.local.store.get({ key: key }, (e, v) => {
       try {
         expect(e).toBeFalsy();
         expect(v).toEqual(user);
@@ -628,11 +628,11 @@ test('(0.5 pts) local.store.put/get(jcarb)', (done) => {
 });
 
 test('(0.5 pts) local.store.put/del(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbspd';
 
-  distribution.local.store.put(user, key, (e, v) => {
-    distribution.local.store.del(key, (e, v) => {
+  distribution.local.store.put(user, { key: key }, (e, v) => {
+    distribution.local.store.del({ key: key }, (e, v) => {
       try {
         expect(e).toBeFalsy();
         expect(v).toEqual(user);
@@ -645,12 +645,12 @@ test('(0.5 pts) local.store.put/del(jcarb)', (done) => {
 });
 
 test('(0.5 pts) local.store.put/del/get(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbspdg';
 
-  distribution.local.store.put(user, key, (e, v) => {
-    distribution.local.store.del(key, (e, v) => {
-      distribution.local.store.get(key, (e, v) => {
+  distribution.local.store.put(user, { key: key }, (e, v) => {
+    distribution.local.store.del({ key: key }, (e, v) => {
+      distribution.local.store.get({ key: key }, (e, v) => {
         try {
           expect(e).toBeInstanceOf(Error);
           expect(v).toBeFalsy();
@@ -665,9 +665,9 @@ test('(0.5 pts) local.store.put/del/get(jcarb)', (done) => {
 
 test('(2 pts) local.store.get(no key)', (done) => {
   const users = [
-    {first: 'Emma', last: 'Watson'},
-    {first: 'John', last: 'Krasinski'},
-    {first: 'Julie', last: 'Bowen'},
+    { first: 'Emma', last: 'Watson' },
+    { first: 'John', last: 'Krasinski' },
+    { first: 'Julie', last: 'Bowen' },
   ];
   const keys = [
     'ewatson',
@@ -675,10 +675,10 @@ test('(2 pts) local.store.get(no key)', (done) => {
     'jbowen',
   ];
 
-  distribution.local.store.put(users[0], keys[0], (e, v) => {
-    distribution.local.store.put(users[1], keys[1], (e, v) => {
-      distribution.local.store.put(users[2], keys[2], (e, v) => {
-        distribution.local.store.get(null, (e, v) => {
+  distribution.local.store.put(users[0], { key: keys[0] }, (e, v) => {
+    distribution.local.store.put(users[1], { key: keys[1] }, (e, v) => {
+      distribution.local.store.put(users[2], { key: keys[2] }, (e, v) => {
+        distribution.local.store.get({ key: null }, (e, v) => {
           try {
             expect(e).toBeFalsy();
             expect(Object.values(v)).toEqual(expect.arrayContaining(keys));
@@ -693,10 +693,10 @@ test('(2 pts) local.store.get(no key)', (done) => {
 });
 
 test('(0.5 pts) local.store.put(no key)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
 
-  distribution.local.store.put(user, null, (e, v) => {
-    distribution.local.store.get(id.getID(user), (e, v) => {
+  distribution.local.store.put(user, { key: null }, (e, v) => {
+    distribution.local.store.get({ key: id.getID(user) }, (e, v) => {
       try {
         expect(e).toBeFalsy();
         expect(v).toEqual(user);
@@ -713,9 +713,9 @@ test('(0.5 pts) local.store.put(no key)', (done) => {
 test('(2 pts) naiveHash() - 1', (done) => {
   const key = 'jcarb';
   const nodes = [
-    {ip: '127.0.0.1', port: 10000},
-    {ip: '127.0.0.1', port: 10001},
-    {ip: '127.0.0.1', port: 10002},
+    { ip: '127.0.0.1', port: 10000 },
+    { ip: '127.0.0.1', port: 10001 },
+    { ip: '127.0.0.1', port: 10002 },
   ];
 
   const kid = id.getID(key);
@@ -738,9 +738,9 @@ test('(2 pts) naiveHash() - 1', (done) => {
 test('(2 pts) consistentHash() - 1', (done) => {
   const key = 'jcarb';
   const nodes = [
-    {ip: '127.0.0.1', port: 10000},
-    {ip: '127.0.0.1', port: 10001},
-    {ip: '127.0.0.1', port: 10002},
+    { ip: '127.0.0.1', port: 10000 },
+    { ip: '127.0.0.1', port: 10001 },
+    { ip: '127.0.0.1', port: 10002 },
   ];
 
   const kid = id.getID(key);
@@ -763,9 +763,9 @@ test('(2 pts) consistentHash() - 1', (done) => {
 test('(2 pts) rendezvousHash() - 1', (done) => {
   const key = 'jcarb';
   const nodes = [
-    {ip: '127.0.0.1', port: 10000},
-    {ip: '127.0.0.1', port: 10001},
-    {ip: '127.0.0.1', port: 10002},
+    { ip: '127.0.0.1', port: 10000 },
+    { ip: '127.0.0.1', port: 10001 },
+    { ip: '127.0.0.1', port: 10002 },
   ];
 
   const kid = id.getID(key);

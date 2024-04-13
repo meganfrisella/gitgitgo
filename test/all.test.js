@@ -1,4 +1,4 @@
-global.nodeConfig = {ip: '127.0.0.1', port: 8080};
+global.nodeConfig = { ip: '127.0.0.1', port: 8080 };
 const distribution = require('../distribution');
 const id = distribution.util.id;
 
@@ -22,16 +22,16 @@ const group4Group = {};
 */
 let localServer = null;
 
-const n1 = {ip: '127.0.0.1', port: 8000};
-const n2 = {ip: '127.0.0.1', port: 8001};
-const n3 = {ip: '127.0.0.1', port: 8002};
-const n4 = {ip: '127.0.0.1', port: 8003};
-const n5 = {ip: '127.0.0.1', port: 8004};
-const n6 = {ip: '127.0.0.1', port: 8005};
+const n1 = { ip: '127.0.0.1', port: 8000 };
+const n2 = { ip: '127.0.0.1', port: 8001 };
+const n3 = { ip: '127.0.0.1', port: 8002 };
+const n4 = { ip: '127.0.0.1', port: 8003 };
+const n5 = { ip: '127.0.0.1', port: 8004 };
+const n6 = { ip: '127.0.0.1', port: 8005 };
 
 beforeAll((done) => {
   // First, stop the nodes if they are running
-  let remote = {service: 'status', method: 'stop'};
+  let remote = { service: 'status', method: 'stop' };
 
   remote.node = n1;
   distribution.local.comm.send([], remote, (e, v) => {
@@ -77,29 +77,29 @@ beforeAll((done) => {
     localServer = server;
 
     const groupInstantiation = (e, v) => {
-      const mygroupConfig = {gid: 'mygroup'};
-      const group1Config = {gid: 'group1', hash: id.naiveHash};
-      const group2Config = {gid: 'group2', hash: id.consistentHash};
-      const group3Config = {gid: 'group3', hash: id.rendezvousHash};
-      const group4Config = {gid: 'group4'};
+      const mygroupConfig = { gid: 'mygroup' };
+      const group1Config = { gid: 'group1', hash: id.naiveHash };
+      const group2Config = { gid: 'group2', hash: id.consistentHash };
+      const group3Config = { gid: 'group3', hash: id.rendezvousHash };
+      const group4Config = { gid: 'group4' };
 
       // Create some groups
       groupsTemplate(mygroupConfig)
-          .put(mygroupConfig, mygroupGroup, (e, v) => {
-            groupsTemplate(group1Config)
-                .put(group1Config, group1Group, (e, v) => {
-                  groupsTemplate(group2Config)
-                      .put(group2Config, group2Group, (e, v) => {
-                        groupsTemplate(group3Config)
-                            .put(group3Config, group3Group, (e, v) => {
-                              groupsTemplate(group4Config)
-                                  .put(group4Config, group4Group, (e, v) => {
-                                    done();
-                                  });
-                            });
-                      });
+        .put(mygroupConfig, mygroupGroup, (e, v) => {
+          groupsTemplate(group1Config)
+            .put(group1Config, group1Group, (e, v) => {
+              groupsTemplate(group2Config)
+                .put(group2Config, group2Group, (e, v) => {
+                  groupsTemplate(group3Config)
+                    .put(group3Config, group3Group, (e, v) => {
+                      groupsTemplate(group4Config)
+                        .put(group4Config, group4Group, (e, v) => {
+                          done();
+                        });
+                    });
                 });
-          });
+            });
+        });
     };
 
     // Start the nodes
@@ -119,7 +119,7 @@ beforeAll((done) => {
 
 afterAll((done) => {
   distribution.mygroup.status.stop((e, v) => {
-    let remote = {service: 'status', method: 'stop'};
+    let remote = { service: 'status', method: 'stop' };
     remote.node = n1;
     distribution.local.comm.send([], remote, (e, v) => {
       remote.node = n2;
@@ -147,7 +147,7 @@ afterAll((done) => {
 
 test('(4 pts) all.comm.send(status.get(nid))', (done) => {
   const nids = Object.values(mygroupGroup).map((node) => id.getNID(node));
-  const remote = {service: 'status', method: 'get'};
+  const remote = { service: 'status', method: 'get' };
 
   distribution.mygroup.comm.send(['nid'], remote, (e, v) => {
     expect(e).toEqual({});
@@ -162,7 +162,7 @@ test('(4 pts) all.comm.send(status.get(nid))', (done) => {
 });
 
 test('(2 pts) all.comm.send(status.get(random))', (done) => {
-  const remote = {service: 'status', method: 'get'};
+  const remote = { service: 'status', method: 'get' };
 
   distribution.mygroup.comm.send(['random'], remote, (e, v) => {
     try {
@@ -197,8 +197,8 @@ test('(2 pts) all.groups.del(random)', (done) => {
 
 test('(2 pts) all.groups.put(browncs)', (done) => {
   let g = {
-    '507aa': {ip: '127.0.0.1', port: 8080},
-    '12ab0': {ip: '127.0.0.1', port: 8081},
+    '507aa': { ip: '127.0.0.1', port: 8080 },
+    '12ab0': { ip: '127.0.0.1', port: 8081 },
   };
 
   distribution.group4.groups.put('browncsgp', g, (e, v) => {
@@ -216,8 +216,8 @@ test('(2 pts) all.groups.put(browncs)', (done) => {
 
 test('(2 pts) all.groups.put/get(browncs)', (done) => {
   let g = {
-    '507aa': {ip: '127.0.0.1', port: 8080},
-    '12ab0': {ip: '127.0.0.1', port: 8081},
+    '507aa': { ip: '127.0.0.1', port: 8080 },
+    '12ab0': { ip: '127.0.0.1', port: 8081 },
   };
 
   distribution.group4.groups.put('browncsgpg', g, (e, v) => {
@@ -237,8 +237,8 @@ test('(2 pts) all.groups.put/get(browncs)', (done) => {
 
 test('(2 pts) all.groups.put/get/del(browncs)', (done) => {
   let g = {
-    '507aa': {ip: '127.0.0.1', port: 8080},
-    '12ab0': {ip: '127.0.0.1', port: 8081},
+    '507aa': { ip: '127.0.0.1', port: 8080 },
+    '12ab0': { ip: '127.0.0.1', port: 8081 },
   };
 
   distribution.group4.groups.put('browncsgpgd', g, (e, v) => {
@@ -260,8 +260,8 @@ test('(2 pts) all.groups.put/get/del(browncs)', (done) => {
 
 test('(2 pts) all.groups.put/get/del/get(browncs)', (done) => {
   let g = {
-    '507aa': {ip: '127.0.0.1', port: 8080},
-    '12ab0': {ip: '127.0.0.1', port: 8081},
+    '507aa': { ip: '127.0.0.1', port: 8080 },
+    '12ab0': { ip: '127.0.0.1', port: 8081 },
   };
 
   distribution.group4.groups.put('browncsgpgdg', g, (e, v) => {
@@ -286,16 +286,16 @@ test('(2 pts) all.groups.put/get/del/get(browncs)', (done) => {
 
 test('(2 pts) all.groups.put(dummy)/add(n1)/get(dummy)', (done) => {
   let g = {
-    '507aa': {ip: '127.0.0.1', port: 8080},
-    '12ab0': {ip: '127.0.0.1', port: 8081},
+    '507aa': { ip: '127.0.0.1', port: 8080 },
+    '12ab0': { ip: '127.0.0.1', port: 8081 },
   };
 
   distribution.group4.groups.put('dummygpag', g, (e, v) => {
-    let n1 = {ip: '127.0.0.1', port: 8082};
+    let n1 = { ip: '127.0.0.1', port: 8082 };
 
     distribution.group4.groups.add('dummygpag', n1, (e, v) => {
       let expectedGroup = {
-        ...g, ...{[id.getSID(n1)]: n1},
+        ...g, ...{ [id.getSID(n1)]: n1 },
       };
 
       distribution.group4.groups.get('dummygpag', (e, v) => {
@@ -315,14 +315,14 @@ test('(2 pts) all.groups.put(dummy)/add(n1)/get(dummy)', (done) => {
 
 test('(2 pts) all.groups.put(dummy)/rem(n1)/get(dummy)', (done) => {
   let g = {
-    '507aa': {ip: '127.0.0.1', port: 8080},
-    '12ab0': {ip: '127.0.0.1', port: 8081},
+    '507aa': { ip: '127.0.0.1', port: 8080 },
+    '12ab0': { ip: '127.0.0.1', port: 8081 },
   };
 
   distribution.group4.groups.put('dummygprg', g, (e, v) => {
     distribution.group4.groups.rem('dummygprg', '507aa', (e, v) => {
       let expectedGroup = {
-        '12ab0': {ip: '127.0.0.1', port: 8081},
+        '12ab0': { ip: '127.0.0.1', port: 8081 },
       };
 
       distribution.group4.groups.get('dummygprg', (e, v) => {
@@ -350,12 +350,12 @@ test('(2 pts) all.routes.put(echo)', (done) => {
   };
 
   distribution.mygroup.routes.put(echoService, 'echo', (e, v) => {
-    const n1 = {ip: '127.0.0.1', port: 8000};
-    const n2 = {ip: '127.0.0.1', port: 8001};
-    const n3 ={ip: '127.0.0.1', port: 8002};
-    const r1 = {node: n1, service: 'routes', method: 'get'};
-    const r2 = {node: n2, service: 'routes', method: 'get'};
-    const r3 = {node: n3, service: 'routes', method: 'get'};
+    const n1 = { ip: '127.0.0.1', port: 8000 };
+    const n2 = { ip: '127.0.0.1', port: 8001 };
+    const n3 = { ip: '127.0.0.1', port: 8002 };
+    const r1 = { node: n1, service: 'routes', method: 'get' };
+    const r2 = { node: n2, service: 'routes', method: 'get' };
+    const r3 = { node: n3, service: 'routes', method: 'get' };
 
     distribution.local.comm.send(['echo'], r1, (e, v) => {
       try {
@@ -419,7 +419,7 @@ test('(2 pts) all.status.get(random)', (done) => {
 
 test('(2 pts) all.status.spawn/stop()', (done) => {
   // Spawn a node
-  const nodeToSpawn = {ip: '127.0.0.1', port: 8008};
+  const nodeToSpawn = { ip: '127.0.0.1', port: 8008 };
 
   // Spawn the node
   distribution.group4.status.spawn(nodeToSpawn, (e, v) => {
@@ -430,7 +430,7 @@ test('(2 pts) all.status.spawn/stop()', (done) => {
     } catch (error) {
       done(error);
     }
-    remote = {node: nodeToSpawn, service: 'status', method: 'get'};
+    remote = { node: nodeToSpawn, service: 'status', method: 'get' };
     message = [
       'nid', // configuration
     ];
@@ -452,7 +452,7 @@ test('(2 pts) all.status.spawn/stop()', (done) => {
           done(error);
         }
 
-        remote = {node: nodeToSpawn, service: 'status', method: 'stop'};
+        remote = { node: nodeToSpawn, service: 'status', method: 'stop' };
 
         // Stop the node
         distribution.local.comm.send([], remote, (e, v) => {
@@ -463,20 +463,20 @@ test('(2 pts) all.status.spawn/stop()', (done) => {
           } catch (error) {
             done(error);
           }
-          remote = {node: nodeToSpawn, service: 'status', method: 'get'};
+          remote = { node: nodeToSpawn, service: 'status', method: 'get' };
 
           // Ping the node again, it shouldn't respond
           distribution.local.comm.send(message,
-              remote, (e, v) => {
-                try {
-                  expect(e).toBeDefined();
-                  expect(e).toBeInstanceOf(Error);
-                  expect(v).toBeFalsy();
-                  done();
-                } catch (error) {
-                  done(error);
-                }
-              });
+            remote, (e, v) => {
+              try {
+                expect(e).toBeDefined();
+                expect(e).toBeInstanceOf(Error);
+                expect(v).toBeFalsy();
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
         });
       });
     });
@@ -487,13 +487,13 @@ test('(2 pts) all.status.spawn/stop()', (done) => {
 
 test('(6 pts) all.gossip.send()', (done) => {
   distribution.mygroup.groups.put('newgroup', {}, (e, v) => {
-    let newNode = {ip: '127.0.0.1', port: 4444};
+    let newNode = { ip: '127.0.0.1', port: 4444 };
     let message = [
       'newgroup',
       newNode,
     ];
 
-    let remote = {service: 'groups', method: 'add'};
+    let remote = { service: 'groups', method: 'add' };
     distribution.mygroup.gossip.send(message, remote, (e, v) => {
       setTimeout(() => {
         distribution.mygroup.groups.get('newgroup', (e, v) => {
@@ -522,7 +522,7 @@ test('(6 pts) all.gossip.send()', (done) => {
 // // ---mem---
 
 test('(1 pts) all.mem.put(jcarb)/mygroup.mem.get(jcarb)', (done) => {
-  const user = {first: 'John', last: 'Carberry'};
+  const user = { first: 'John', last: 'Carberry' };
   const key = 'jcarbmpmg';
 
   distribution.all.mem.put(user, key, (e, v) => {
@@ -563,7 +563,7 @@ test('(0.5 pts) all.mem.del(jcarb)', (done) => {
 });
 
 test('(0.5 pts) all.mem.put(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbmp';
 
   distribution.mygroup.mem.put(user, key, (e, v) => {
@@ -578,7 +578,7 @@ test('(0.5 pts) all.mem.put(jcarb)', (done) => {
 });
 
 test('(0.5 pts) all.mem.put/get(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbmpg';
 
   distribution.mygroup.mem.put(user, key, (e, v) => {
@@ -595,7 +595,7 @@ test('(0.5 pts) all.mem.put/get(jcarb)', (done) => {
 });
 
 test('(0.5 pts) all.mem.put/del(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbmpd';
 
   distribution.mygroup.mem.put(user, key, (e, v) => {
@@ -612,7 +612,7 @@ test('(0.5 pts) all.mem.put/del(jcarb)', (done) => {
 });
 
 test('(0.5 pts) all.mem.put/del/get(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbmpdg';
 
   distribution.mygroup.mem.put(user, key, (e, v) => {
@@ -632,9 +632,9 @@ test('(0.5 pts) all.mem.put/del/get(jcarb)', (done) => {
 
 test('(2.5 pts) all.mem.get(no key)', (done) => {
   const users = [
-    {first: 'Emma', last: 'Watson'},
-    {first: 'John', last: 'Krasinski'},
-    {first: 'Julie', last: 'Bowen'},
+    { first: 'Emma', last: 'Watson' },
+    { first: 'John', last: 'Krasinski' },
+    { first: 'Julie', last: 'Bowen' },
   ];
   const keys = [
     'ewatson',
@@ -675,7 +675,7 @@ test('(2.5 pts) all.mem.get(no key)', (done) => {
 });
 
 test('(0.5 pts) all.mem.put(no key)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
 
   distribution.mygroup.mem.put(user, null, (e, v) => {
     distribution.mygroup.mem.get(id.getID(user), (e, v) => {
@@ -693,11 +693,11 @@ test('(0.5 pts) all.mem.put(no key)', (done) => {
 // ---store---
 
 test('(1 pts) all.store.put(jcarb)/mygroup.store.get(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbspsg';
 
-  distribution.all.store.put(user, key, (e, v) => {
-    distribution.mygroup.store.get(key, (e, v) => {
+  distribution.all.store.put(user, { key: key }, (e, v) => {
+    distribution.mygroup.store.get({ key: key }, (e, v) => {
       try {
         expect(e).toBeInstanceOf(Error);
         expect(v).toBeFalsy();
@@ -710,7 +710,7 @@ test('(1 pts) all.store.put(jcarb)/mygroup.store.get(jcarb)', (done) => {
 });
 
 test('(0.5 pts) all.store.get(jcarb)', (done) => {
-  distribution.mygroup.store.get('jcarb', (e, v) => {
+  distribution.mygroup.store.get({ key: 'jcarb' }, (e, v) => {
     try {
       expect(e).toBeInstanceOf(Error);
       expect(v).toBeFalsy();
@@ -722,7 +722,7 @@ test('(0.5 pts) all.store.get(jcarb)', (done) => {
 });
 
 test('(0.5 pts) all.store.del(jcarb)', (done) => {
-  distribution.mygroup.store.del('jcarb', (e, v) => {
+  distribution.mygroup.store.del({ key: 'jcarb' }, (e, v) => {
     try {
       expect(e).toBeInstanceOf(Error);
       expect(v).toBeFalsy();
@@ -734,10 +734,10 @@ test('(0.5 pts) all.store.del(jcarb)', (done) => {
 });
 
 test('(0.5 pts) all.store.put(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbmp';
 
-  distribution.mygroup.store.put(user, key, (e, v) => {
+  distribution.mygroup.store.put(user, { key: key }, (e, v) => {
     try {
       expect(e).toBeFalsy();
       expect(v).toEqual(user);
@@ -749,11 +749,11 @@ test('(0.5 pts) all.store.put(jcarb)', (done) => {
 });
 
 test('(0.5 pts) all.store.put/get(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbmpg';
 
-  distribution.mygroup.store.put(user, key, (e, v) => {
-    distribution.mygroup.store.get(key, (e, v) => {
+  distribution.mygroup.store.put(user, { key: key }, (e, v) => {
+    distribution.mygroup.store.get({ key: key }, (e, v) => {
       try {
         expect(e).toBeFalsy();
         expect(v).toEqual(user);
@@ -766,11 +766,11 @@ test('(0.5 pts) all.store.put/get(jcarb)', (done) => {
 });
 
 test('(0.5 pts) all.store.put/del(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbmpd';
 
-  distribution.mygroup.store.put(user, key, (e, v) => {
-    distribution.mygroup.store.del(key, (e, v) => {
+  distribution.mygroup.store.put(user, { key: key }, (e, v) => {
+    distribution.mygroup.store.del({ key: key }, (e, v) => {
       try {
         expect(e).toBeFalsy();
         expect(v).toEqual(user);
@@ -783,12 +783,12 @@ test('(0.5 pts) all.store.put/del(jcarb)', (done) => {
 });
 
 test('(0.5 pts) all.store.put/del/get(jcarb)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
   const key = 'jcarbmpdg';
 
-  distribution.mygroup.store.put(user, key, (e, v) => {
-    distribution.mygroup.store.del(key, (e, v) => {
-      distribution.mygroup.store.get(key, (e, v) => {
+  distribution.mygroup.store.put(user, { key: key }, (e, v) => {
+    distribution.mygroup.store.del({ key: key }, (e, v) => {
+      distribution.mygroup.store.get({ key: key }, (e, v) => {
         try {
           expect(e).toBeInstanceOf(Error);
           expect(v).toBeFalsy();
@@ -803,9 +803,9 @@ test('(0.5 pts) all.store.put/del/get(jcarb)', (done) => {
 
 test('(2 pts) all.store.get(no key)', (done) => {
   const users = [
-    {first: 'Emma', last: 'Watson'},
-    {first: 'John', last: 'Krasinski'},
-    {first: 'Julie', last: 'Bowen'},
+    { first: 'Emma', last: 'Watson' },
+    { first: 'John', last: 'Krasinski' },
+    { first: 'Julie', last: 'Bowen' },
   ];
   const keys = [
     'ewatsonsgnk',
@@ -813,10 +813,10 @@ test('(2 pts) all.store.get(no key)', (done) => {
     'jbowensgnk',
   ];
 
-  distribution.mygroup.store.put(users[0], keys[0], (e, v) => {
-    distribution.mygroup.store.put(users[1], keys[1], (e, v) => {
-      distribution.mygroup.store.put(users[2], keys[2], (e, v) => {
-        distribution.mygroup.store.get(null, (e, v) => {
+  distribution.mygroup.store.put(users[0], { key: keys[0] }, (e, v) => {
+    distribution.mygroup.store.put(users[1], { key: keys[1] }, (e, v) => {
+      distribution.mygroup.store.put(users[2], { key: keys[2] }, (e, v) => {
+        distribution.mygroup.store.get({ key: null }, (e, v) => {
           try {
             expect(e).toEqual({});
             expect(Object.values(v)).toEqual(expect.arrayContaining(keys));
@@ -831,10 +831,10 @@ test('(2 pts) all.store.get(no key)', (done) => {
 });
 
 test('(0.5 pts) all.store.put(no key)', (done) => {
-  const user = {first: 'Josiah', last: 'Carberry'};
+  const user = { first: 'Josiah', last: 'Carberry' };
 
-  distribution.mygroup.store.put(user, null, (e, v) => {
-    distribution.mygroup.store.get(id.getID(user), (e, v) => {
+  distribution.mygroup.store.put(user, { key: null }, (e, v) => {
+    distribution.mygroup.store.get({ key: id.getID(user) }, (e, v) => {
       try {
         expect(e).toBeFalsy();
         expect(v).toEqual(user);
@@ -850,31 +850,31 @@ test('(0.5 pts) all.store.put(no key)', (done) => {
 // // ---reconf / correct object placement---
 
 test(
-    '(1.5 pts) all.store.put(jcarb)/local.comm.send(store.get(jcarb))',
-    (done) => {
-      const user = {first: 'Josiah', last: 'Carberry'};
-      const key = 'jcarbspcs';
-      const kid = id.getID(key);
-      const nodes = [n2, n4, n6];
-      const nids = nodes.map((node) => id.getNID(node));
+  '(1.5 pts) all.store.put(jcarb)/local.comm.send(store.get(jcarb))',
+  (done) => {
+    const user = { first: 'Josiah', last: 'Carberry' };
+    const key = 'jcarbspcs';
+    const kid = id.getID(key);
+    const nodes = [n2, n4, n6];
+    const nids = nodes.map((node) => id.getNID(node));
 
-      distribution.group3.store.put(user, key, (e, v) => {
-        const nid = id.rendezvousHash(kid, nids);
-        const pickedNode = nodes.filter((node)=> id.getNID(node) === nid)[0];
-        const remote = {node: pickedNode, service: 'store', method: 'get'};
-        const message = [{gid: 'group3', key: key}];
+    distribution.group3.store.put(user, { key: key }, (e, v) => {
+      const nid = id.rendezvousHash(kid, nids);
+      const pickedNode = nodes.filter((node) => id.getNID(node) === nid)[0];
+      const remote = { node: pickedNode, service: 'store', method: 'get' };
+      const message = [{ gid: 'group3', key: key }];
 
-        distribution.local.comm.send(message, remote, (e, v) => {
-          try {
-            expect(e).toBeFalsy();
-            expect(v).toEqual(user);
-            done();
-          } catch (error) {
-            done(error);
-          }
-        });
+      distribution.local.comm.send(message, remote, (e, v) => {
+        try {
+          expect(e).toBeFalsy();
+          expect(v).toEqual(user);
+          done();
+        } catch (error) {
+          done(error);
+        }
       });
-    },
+    });
+  },
 );
 
 test('(2 pts) all.store.reconf(naiveHash)', (done) => {
@@ -898,11 +898,11 @@ test('(2 pts) all.store.reconf(naiveHash)', (done) => {
   // group1 uses the naiveHash function for item placement,
   // so we test using the same naiveHash function
   const users = [
-    {first: 'Emma', last: 'Watson'},
-    {first: 'John', last: 'Krasinski'},
-    {first: 'Julie', last: 'Bowen'},
-    {first: 'Sasha', last: 'Spielberg'},
-    {first: 'Tim', last: 'Nelson'},
+    { first: 'Emma', last: 'Watson' },
+    { first: 'John', last: 'Krasinski' },
+    { first: 'Julie', last: 'Bowen' },
+    { first: 'Sasha', last: 'Spielberg' },
+    { first: 'Tim', last: 'Nelson' },
   ];
   const keys = [
     'ewatsonmrnh',
@@ -917,12 +917,12 @@ test('(2 pts) all.store.reconf(naiveHash)', (done) => {
 
   const nidsPicked = kids.map((kid) => id.naiveHash(kid, nids));
   const nodesPicked = nidsPicked.map(
-      (nid) => nodes.filter((node) => id.getNID(node) === nid)[0],
+    (nid) => nodes.filter((node) => id.getNID(node) === nid)[0],
   );
   // key 0 ends up on n6, while keys 1-4 end up on n4
   // (the following console.logs should confirm that)
   nodesPicked.forEach(
-      (node, key) => console.log('BEFORE! key: ', key, 'node: ', node),
+    (node, key) => console.log('BEFORE! key: ', key, 'node: ', node),
   );
 
   // Then, we remove n5 from the list of nodes,
@@ -933,25 +933,25 @@ test('(2 pts) all.store.reconf(naiveHash)', (done) => {
 
   const nidsPickedAfter = kids.map((kid) => id.naiveHash(kid, nidsAfter));
   const nodesPickedAfter = nidsPickedAfter.map(
-      (nid) => nodesAfter.filter((node) => id.getNID(node) === nid)[0],
+    (nid) => nodesAfter.filter((node) => id.getNID(node) === nid)[0],
   );
 
   // After removal, all keys end up on n6
   // (Again, the console.logs should be consistent with that!)
   nodesPickedAfter.forEach(
-      (node, key) => console.log('AFTER! key: ', key, 'node: ', node),
+    (node, key) => console.log('AFTER! key: ', key, 'node: ', node),
   );
 
   // This function will be called after we put items in nodes
   const checkPlacement = (e, v) => {
     try {
-      const remote = {node: n6, service: 'store', method: 'get'};
+      const remote = { node: n6, service: 'store', method: 'get' };
       const messages = [
-        [{key: keys[0], gid: 'group1'}],
-        [{key: keys[1], gid: 'group1'}],
-        [{key: keys[2], gid: 'group1'}],
-        [{key: keys[3], gid: 'group1'}],
-        [{key: keys[4], gid: 'group1'}],
+        [{ key: keys[0], gid: 'group1' }],
+        [{ key: keys[1], gid: 'group1' }],
+        [{ key: keys[2], gid: 'group1' }],
+        [{ key: keys[3], gid: 'group1' }],
+        [{ key: keys[4], gid: 'group1' }],
       ];
 
       distribution.local.comm.send(messages[0], remote, (e, v) => {
@@ -1010,16 +1010,16 @@ test('(2 pts) all.store.reconf(naiveHash)', (done) => {
     distribution.group1.store.put(users[1], keys[1], (e, v) => {
       distribution.group1.store.put(users[2], keys[2], (e, v) => {
         distribution.group1.store.put(users[3], keys[3], (e, v) => {
-          distribution.group1.store.put(users[4], keys[4], (e, v)=> {
+          distribution.group1.store.put(users[4], keys[4], (e, v) => {
             // We need to pass a copy of the group's
             // nodes before the changes to reconf()
-            const groupCopy = {...group1Group};
+            const groupCopy = { ...group1Group };
             distribution.group1.groups.rem(
-                'group1',
-                id.getSID(n5),
-                (e, v) => {
-                  distribution.group1.store.reconf(groupCopy, checkPlacement);
-                });
+              'group1',
+              id.getSID(n5),
+              (e, v) => {
+                distribution.group1.store.reconf(groupCopy, checkPlacement);
+              });
           });
         });
       });

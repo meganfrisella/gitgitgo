@@ -21,11 +21,13 @@ const mr = function (config = { gid: 'all' }) {
             let out = [];
             let cnt = 0;
             keys.forEach((key) => {
-              distribution[gid].store.get(key, (e, val) => {
+              distribution[gid].store.get({ key: key }, (e, val) => {
                 cnt++;
                 out.push(this.mapper(key, val));
                 if (cnt == keys.length) {
-                  distribution.local.store.put(out, `${mrID}_map`, (e, v) => {
+                  // local.store.append each of the values as they come, can group as you are storing
+                  // send the map output into a subfolder mrID_map (change local.store a little to take a collection (subdir) name)
+                  distribution.local.store.put(out, { key: `${mrID}_map` }, (e, v) => {
                     cb(e, out);
                   });
                 }
@@ -61,7 +63,7 @@ const mr = function (config = { gid: 'all' }) {
             return grouped;
           };
 
-          distribution.local.store.get(`${mrID}_map`, (e, mapped) => {
+          distribution.local.store.get({ key: `${mrID}_map` }, (e, mapped) => {
             if (!e) {
               let grouped = group(mapped);
               let rem = { service: 'mem', method: 'putMR' };
@@ -69,6 +71,7 @@ const mr = function (config = { gid: 'all' }) {
               Object.keys(grouped)
                 .forEach((key) => {
                   distribution[gid].comm
+                    // TODO: send to the mr-reduce subdir of the node that this is being sent to
                     .send([grouped[key], key], rem, (e, v) => {
                       cnt++;
                       if (cnt == Object.keys(grouped).length) {
@@ -84,6 +87,7 @@ const mr = function (config = { gid: 'all' }) {
 
         reduce: function (gid, mrID, cb = function () { }) {
           distribution.local.mem.getMR(null, (e, keys) => {
+            // TODO: do a local put for each key (into some mr-out dir), rather than accumulating in memory)
             let out = [];
             let cnt = 0;
             keys.forEach((key) =>
