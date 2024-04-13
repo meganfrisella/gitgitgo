@@ -38,7 +38,7 @@ status.stop = function(cb = defaultCallback) {
     server.close();
     setTimeout(() => {
       server.closeAllConnections();
-      process.exit();
+      process.exit(0);
     }, 1000);
     cb(null, global.nodeConfig);
   }

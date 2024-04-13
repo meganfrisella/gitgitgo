@@ -708,6 +708,27 @@ test('(0.5 pts) local.store.put(no key)', (done) => {
   });
 });
 
+test('local.store.append', (done) => {
+  const user = { first: 'Josiah', last: 'Carberry' };
+  const user2 = "text_with_newline\n";
+
+  distribution.local.store.append(user, { key: 'append-test' }, (e, v) => {
+    distribution.local.store.append(user2, {
+      key: 'append-test'
+    }, (e, v) => {
+      distribution.local.store.get({ key: 'append-test' }, (e, v) => {
+        try {
+          expect(e).toBeFalsy();
+          expect(v).toEqual([user, user2]);
+          done();
+        } catch (error) {
+          done(error);
+        }
+      });
+    })
+  });
+});
+
 // ---Hashing---
 
 test('(2 pts) naiveHash() - 1', (done) => {
