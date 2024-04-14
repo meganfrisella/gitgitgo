@@ -1,7 +1,7 @@
 const crawler = (keys, gid, cb) => {
-    const cMap = (key, value, gid) => {
-      console.log('calling http get');
-
+    const cMap = (key, value, cb) => {
+      const https = require('https');
+      
       global.http.get(value, (res) => {
         let data = [];
         res.on('data', (chunk) => {
