@@ -15,10 +15,6 @@ global.nodeState.groupsStore.set('local', localGroup);
 global.nodeState.groupsStore.set('all', localGroup);
 
 const nodeDir = path.join(__dirname, '../../store', global.moreStatus.sid);
-fs.mkdirSync(path.join(nodeDir, 'local'), { recursive: true });
-fs.mkdirSync(path.join(nodeDir, 'local', 'default'), { recursive: true });
-fs.mkdirSync(path.join(nodeDir, 'all'), { recursive: true });
-fs.mkdirSync(path.join(nodeDir, 'all', 'default'), { recursive: true });
 
 groups.get = function (key, cb = defaultCallback) {
   if (global.nodeState.groupsStore.has(key)) {
@@ -50,9 +46,6 @@ groups.put = function (key, group, cb = defaultCallback) {
   distribution[key].mr = require('../all/mr.js')(config);
 
   fs.mkdirSync(path.join(nodeDir, key), { recursive: true });
-
-  fs.mkdirSync(path.join(nodeDir, key, 'default'), { recursive: true });
-
   cb(null, group);
 };
 

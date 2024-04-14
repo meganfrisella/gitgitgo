@@ -1018,7 +1018,7 @@ test('(2 pts) all.store.reconf(naiveHash)', (done) => {
               'group1',
               id.getSID(n5),
               (e, v) => {
-                distribution.group1.store.reconf(groupCopy, checkPlacement);
+                distribution.group1.store.reconf(groupCopy, 'default', checkPlacement);
               });
           });
         });
