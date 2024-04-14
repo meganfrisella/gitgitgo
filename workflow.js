@@ -224,43 +224,43 @@ const setupDatasets = (cb) => {
   }), cb);
 };
 
-// const crawler = (keys, cb) => {
-//   const map = (key, value) => {
-//     const http = require('http');
-//     http.get(value, (res) => {
-//       let data = [];
-//       res.on('data', (chunk) => {
-//         data.push(chunk);
-//       });
+const crawler = (keys, cb) => {
+  const map = (key, value) => {
+    const http = require('http');
+    http.get(value, (res) => {
+      let data = [];
+      res.on('data', (chunk) => {
+        data.push(chunk);
+      });
 
-//       res.on('end', () => {
-//         distribution['crawler'].store.put(data, `${key}-download`);
-//       });
-//     });
+      res.on('end', () => {
+        distribution['crawler'].store.put(data, `${key}-download`);
+      });
+    });
 
-//     const o = {};
-//     o[key] = `${key}-download`;
-//     return o;
-//   };
+    const o = {};
+    o[key] = `${key}-download`;
+    return o;
+  };
 
-//   const reduce = (key, values) => {
-//     const o = {};
-//     o[key] = values[0];
-//     return o;
-//   };
+  const reduce = (key, values) => {
+    const o = {};
+    o[key] = values[0];
+    return o;
+  };
 
-//   const config = {
-//     map,
-//     reduce,
-//     keys,
-//     // memory: true,
-//   };
+  const config = {
+    map,
+    reduce,
+    keys,
+    memory: true,
+  };
 
-//   distribution['crawler'].mr.exec(config, (e, v) => {
-//     console.log(v);
-//     cb(console.log);
-//   });
-// };
+  distribution['crawler'].mr.exec(config, (e, v) => {
+    console.log(v);
+    cb(console.log);
+  });
+};
 
 const extractURL = (keys, cb) => {
   const map = (key, value) => {
@@ -287,7 +287,7 @@ const extractURL = (keys, cb) => {
     map,
     reduce,
     keys,
-    // memory: true,
+    memory: true,
   };
 
   distribution['extractURL'].mr.exec(config, (e, v) => {
@@ -321,7 +321,7 @@ const stringMatch = (keys, regex, cb) => {
     map,
     reduce,
     keys,
-    // memory: true,
+    memory: true,
   };
 
   distribution['stringMatch'].mr.exec(config, (e, v) => {
@@ -353,7 +353,7 @@ const invertedIndex = (keys, cb) => {
     map,
     reduce,
     keys,
-    // memory: true,
+    memory: true,
   };
 
   // recycle the same dataset
