@@ -101,7 +101,7 @@ test('(25 pts) all.mr:ncdc', (done) => {
     let words = value.split(/(\s+)/).filter((e) => e !== ' ');
     let out = {};
     out[words[1]] = parseInt(words[3]);
-    return out;
+    return [out];
   };
 
   let r1 = (key, values) => {
@@ -133,7 +133,6 @@ test('(25 pts) all.mr:ncdc', (done) => {
       }
 
       distribution.ncdc.mr.exec({ keys: v, map: m1, reduce: r1 }, (e, v) => {
-        console.log(e, v);
         try {
           expect(v).toEqual(expect.arrayContaining(expected));
           done();
