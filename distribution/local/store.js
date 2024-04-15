@@ -69,6 +69,7 @@ store.put = function (obj, conf, cb = defaultCallback) {
     key = id.getID(obj);
   }
   const file = getFilePath(conf.gid, conf.col, key);
+  console.log(path.dirname(file));
   ensureDirExists(path.dirname(file));
   const serialized = Array.isArray(obj) ? obj.map(serialization.serialize).join('\n') + '\n' : serialization.serialize(obj);
   try {

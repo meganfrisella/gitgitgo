@@ -1,23 +1,23 @@
 global.require = require;
 
-const fs = require('fs');
-const http = require('http');
-const https = require('https');
-const url = require('url');
-const path = require('path');
-const os = require('os');
-const events = require('events');
-const stream = require('stream');
-const util = require('util');
-const querystring = require('querystring');
-const zlib = require('zlib');
-const buffer = require('buffer');
-const childProcess = require('child_process');
-const cluster = require('cluster');
-const dgram = require('dgram');
-const dns = require('dns');
-const http2 = require('http2');
-const v8 = require('v8');
+const fs = require("fs");
+const http = require("http");
+const https = require("https");
+const url = require("url");
+const path = require("path");
+const os = require("os");
+const events = require("events");
+const stream = require("stream");
+const util = require("util");
+const querystring = require("querystring");
+const zlib = require("zlib");
+const buffer = require("buffer");
+const childProcess = require("child_process");
+const cluster = require("cluster");
+const dgram = require("dgram");
+const dns = require("dns");
+const http2 = require("http2");
+const v8 = require("v8");
 
 // ----------------------------------- //
 //       PASS: Native Functions        //
@@ -25,41 +25,43 @@ const v8 = require('v8');
 
 const stringToNative = new Map();
 const nativeToString = new Map();
-stringToNative.set('global', global);
-nativeToString.set(global, 'global');
-scan(global, 'global', stringToNative, nativeToString);
-scan(fs, 'fs', stringToNative, nativeToString);
-scan(http, 'http', stringToNative, nativeToString);
-scan(https, 'https', stringToNative, nativeToString);
-scan(url, 'url', stringToNative, nativeToString);
-scan(path, 'path', stringToNative, nativeToString);
-scan(os, 'os', stringToNative, nativeToString);
-scan(events, 'events', stringToNative, nativeToString);
-scan(stream, 'stream', stringToNative, nativeToString);
-scan(util, 'util', stringToNative, nativeToString);
-scan(querystring, 'querystring', stringToNative, nativeToString);
-scan(zlib, 'zlib', stringToNative, nativeToString);
-scan(buffer, 'buffer', stringToNative, nativeToString);
-scan(childProcess, 'childProcess', stringToNative, nativeToString);
-scan(cluster, 'cluster', stringToNative, nativeToString);
-scan(dgram, 'dgram', stringToNative, nativeToString);
-scan(dns, 'dns', stringToNative, nativeToString);
-scan(http2, 'http2', stringToNative, nativeToString);
-scan(v8, 'v8', stringToNative, nativeToString);
+stringToNative.set("global", global);
+nativeToString.set(global, "global");
+scan(global, "global", stringToNative, nativeToString);
+scan(fs, "fs", stringToNative, nativeToString);
+scan(http, "http", stringToNative, nativeToString);
+scan(https, "https", stringToNative, nativeToString);
+scan(url, "url", stringToNative, nativeToString);
+scan(path, "path", stringToNative, nativeToString);
+scan(os, "os", stringToNative, nativeToString);
+scan(events, "events", stringToNative, nativeToString);
+scan(stream, "stream", stringToNative, nativeToString);
+scan(util, "util", stringToNative, nativeToString);
+scan(querystring, "querystring", stringToNative, nativeToString);
+scan(zlib, "zlib", stringToNative, nativeToString);
+scan(buffer, "buffer", stringToNative, nativeToString);
+scan(childProcess, "childProcess", stringToNative, nativeToString);
+scan(cluster, "cluster", stringToNative, nativeToString);
+scan(dgram, "dgram", stringToNative, nativeToString);
+scan(dns, "dns", stringToNative, nativeToString);
+scan(http2, "http2", stringToNative, nativeToString);
+scan(v8, "v8", stringToNative, nativeToString);
 
 function scan(obj, key, stringToNative, nativeToString) {
-  var newKey = '';
+  var newKey = "";
   var newObj = {};
   Object.entries(Object.getOwnPropertyDescriptors(obj)).forEach((item) => {
-    newKey = key + '.' + item[0];
+    newKey = key + "." + item[0];
     newObj = item[1].value;
     if (nativeToString.has(newObj)) {
       return;
     }
     stringToNative.set(newKey, newObj);
     nativeToString.set(newObj, newKey);
-    if (newObj != null &&
-            (typeof newObj == 'function' || typeof newObj == 'object')) {
+    if (
+      newObj != null &&
+      (typeof newObj == "function" || typeof newObj == "object")
+    ) {
       scan(newObj, newKey, stringToNative, nativeToString);
     }
   });
@@ -77,34 +79,34 @@ function serialize(object) {
 function serializeInner(object, seen, id) {
   var obj = {};
   if (seen.has(object)) {
-    obj = {type: 'ref', value: seen.get(object)};
+    obj = { type: "ref", value: seen.get(object) };
   } else {
     var obj = {};
     switch (typeof object) {
-      case 'number':
-        obj = {type: 'number', value: object.toString()};
+      case "number":
+        obj = { type: "number", value: object.toString() };
         break;
-      case 'string':
-        obj = {type: 'string', value: object};
+      case "string":
+        obj = { type: "string", value: object };
         break;
-      case 'boolean':
-        obj = {type: 'boolean', value: object.toString()};
+      case "boolean":
+        obj = { type: "boolean", value: object.toString() };
         break;
-      case 'undefined':
-        obj = {type: 'undefined', value: ''};
+      case "undefined":
+        obj = { type: "undefined", value: "" };
         break;
-      case 'function':
+      case "function":
         if (nativeToString.has(object)) {
-          obj = {type: 'function', value: nativeToString.get(object)};
+          obj = { type: "function", value: nativeToString.get(object) };
         } else {
-          obj = {type: 'function', value: '(' + object.toString() + ')'};
+          obj = { type: "function", value: "(" + object.toString() + ")" };
         }
         break;
-      case 'object':
+      case "object":
         if (object == null) {
-          obj = {type: 'null', value: ''};
+          obj = { type: "null", value: "" };
         } else if (nativeToString.has(object)) {
-          obj = {type: 'object', value: nativeToString.get(object)};
+          obj = { type: "object", value: nativeToString.get(object) };
         } else if (object instanceof Array) {
           [obj, id] = serializeArray(object, seen, id);
         } else {
@@ -130,16 +132,16 @@ function serializeArray(object, seen, id) {
     out.push(res);
   });
 
-  return [{type: 'array', id: outerId, value: out}, id];
+  return [{ type: "array", id: outerId, value: out }, id];
 }
 
 function serializeObject(object, seen, id) {
   var obj = {};
 
   if (object instanceof Date) {
-    obj = {type: 'date', value: object};
+    obj = { type: "date", value: object };
   } else if (object instanceof Error) {
-    obj = {type: 'error', value: object.message};
+    obj = { type: "error", value: object.message };
   } else {
     const out = {};
     var res = {};
@@ -150,11 +152,10 @@ function serializeObject(object, seen, id) {
       [res, id] = serializeInner(val, seen, id);
       out[key] = res;
     }
-    obj = {type: 'object', id: outerId, value: out};
+    obj = { type: "object", id: outerId, value: out };
   }
   return [obj, id];
 }
-
 
 // ----------------------------------- //
 //          PASS: Deserialize          //
@@ -170,55 +171,55 @@ function deserialize(string) {
 function deserializeInner(object, refs) {
   var res = {};
   switch (object.type) {
-    case 'number':
+    case "number":
       res = Number(object.value);
       break;
-    case 'string':
+    case "string":
       res = String(object.value);
       break;
-    case 'boolean':
-      if (object.value == 'true') {
+    case "boolean":
+      if (object.value == "true") {
         res = true;
       } else {
         res = false;
       }
       break;
-    case 'array':
+    case "array":
       res = deserializeArray(object.value, refs);
       break;
-    case 'object':
+    case "object":
       if (stringToNative.has(object.value)) {
         res = eval(stringToNative.get(object.value));
       } else {
         res = deserializeObject(object.value, refs);
       }
       break;
-    case 'function':
+    case "function":
       if (stringToNative.has(object.value)) {
         res = eval(stringToNative.get(object.value));
       } else {
         res = eval(object.value);
       }
       break;
-    case 'date':
+    case "date":
       res = new Date(object.value);
       break;
-    case 'error':
+    case "error":
       res = new Error(object.value);
       break;
-    case 'null':
+    case "null":
       res = null;
       break;
-    case 'undefined':
+    case "undefined":
       res = undefined;
       break;
-    case 'ref':
+    case "ref":
       res = new Ref(object.value);
       break;
     default:
       res = {};
   }
-  if (Object.hasOwn(object, 'id')) {
+  if (Object.hasOwn(object, "id")) {
     refs.set(object.id, res);
   }
   return res;
@@ -244,7 +245,6 @@ function deserializeObject(object, refs) {
   return out;
 }
 
-
 // ----------------------------------- //
 //         PASS: Detect Cycles         //
 // ----------------------------------- //
@@ -258,7 +258,7 @@ function setRefs(object, refs) {
     return;
   }
   switch (typeof object) {
-    case 'object':
+    case "object":
       Object.getOwnPropertyNames(object).forEach((val, idx, array) => {
         const obj = object[val];
         if (obj instanceof Ref) {
@@ -272,9 +272,7 @@ function setRefs(object, refs) {
   }
 }
 
-
 module.exports = {
   serialize: serialize,
   deserialize: deserialize,
 };
-
