@@ -1,6 +1,7 @@
 const id = require('../util/id.js');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto')
 
 const defaultCallback = (e, v) => e ? console.error(e) : console.log(v);
 const nodeDir = path.join(__dirname, '../../store', global.moreStatus.sid);
@@ -11,36 +12,33 @@ const mr = function (config = { gid: 'all' }) {
 
   return {
     exec: (mrConfig, cb = defaultCallback) => {
-      const mrID = id.getSID(mrConfig);
+      const mrID = `mr-${crypto.randomUUID()}`;
 
       mrSvc = {
         mapper: mrConfig.map,
         reducer: mrConfig.reduce,
 
         map: function (keys, gid, mrID, cb = function () { }) {
-          const nodeDir = require('path').join(__dirname, '../../store', global.moreStatus.sid);
-          require('fs').mkdirSync(path.join(nodeDir, gid, `${mrID}-map`), { recursive: true });
-          require('fs').mkdirSync(path.join(nodeDir, gid, `${mrID}-reduce`), { recursive: true });
-
           if (keys.length > 0) {
             let err = [];
             let cnt = 0;
             keys.forEach((key) => {
               distribution[gid].store.get({ key: key }, (e, val) => {
                 err.push(e);
-                let res = this.mapper(key, val);
-                let innerCnt = 0;
-                res.forEach(out => {
-                  let [outKey, outVal] = Object.entries(out)[0];
-                  distribution.local.store.append(outVal, { key: outKey, gid: gid, col: `${mrID}-map` }, (e, v) => {
-                    err.push(e);
-                    innerCnt++;
-                    if (innerCnt == res.length) {
-                      cnt++;
-                    }
-                    if (cnt == keys.length) {
-                      cb(err, null);
-                    }
+                this.mapper(key, val, (res) => {
+                  let innerCnt = 0;
+                  res.forEach(out => {
+                    let [outKey, outVal] = out;
+                    distribution.local.store.append(outVal, { key: outKey, gid: gid, col: `${mrID}-map` }, (e, v) => {
+                      err.push(e);
+                      innerCnt++;
+                      if (innerCnt == res.length) {
+                        cnt++;
+                      }
+                      if (cnt == keys.length) {
+                        cb(err, null);
+                      }
+                    });
                   });
                 });
               });
@@ -75,22 +73,24 @@ const mr = function (config = { gid: 'all' }) {
 
         reduce: function (gid, mrID, cb = function () { }) {
           const nodeDir = require('path').join(__dirname, '../../store', global.moreStatus.sid);
-          distribution.local.store.get({ gid: gid, col: `${mrID}-reduce` }, (e, keys) => {
+          distribution.local.store.get({ key: null, gid: gid, col: `${mrID}-reduce` }, (e, keys) => {
             if (keys.length > 0) {
               let err = [];
-              let out = [];
               let cnt = 0;
               keys.forEach((key) =>
                 distribution.local.store.get({ key: key, gid: gid, col: `${mrID}-reduce` }, (e, vals) => {
                   err.push(e);
-                  let res = this.reducer(key, vals);
-                  out.push(res);
-                  cnt++;
-                  if (cnt == keys.length) {
-                    require('fs').rmSync(require('path').join(nodeDir, gid, `${mrID}-map`), { recursive: true, force: true });
-                    require('fs').rmSync(require('path').join(nodeDir, gid, `${mrID}-reduce`), { recursive: true, force: true });
-                    cb(err, out);
-                  }
+                  this.reducer(key, vals, (res) => {
+                    distribution.local.store.put(res, { key: key, gid: gid, col: `${mrID}-out` }, (e, v) => {
+                      err.push(e);
+                      cnt++;
+                      if (cnt == keys.length) {
+                        require('fs').rmSync(require('path').join(nodeDir, gid, `${mrID}-map`), { recursive: true, force: true });
+                        require('fs').rmSync(require('path').join(nodeDir, gid, `${mrID}-reduce`), { recursive: true, force: true });
+                        cb(err, null);
+                      }
+                    });
+                  });
                 }));
             } else {
               require('fs').rmSync(require('path').join(nodeDir, gid, `${mrID}-map`), { recursive: true, force: true });
@@ -132,16 +132,11 @@ const mr = function (config = { gid: 'all' }) {
                   distribution[context.gid].comm.send([context.gid, mrID], shufRem, (e, v) => {
 
                     let redRem = { service: `mr-${mrID}`, method: 'reduce' };
-                    distribution[context.gid].comm.send([context.gid, mrID], redRem, (e, out) => {
+                    distribution[context.gid].comm.send([context.gid, mrID], redRem, (e, v) => {
 
                       distribution[context.gid].routes
                         .del(`mr-${mrID}`, (e, v) => {
-                          console.log("HERE", out);
-                          let ret = [];
-                          for (let val of Object.values(out)) {
-                            ret = ret.concat(val);
-                          }
-                          cb(null, ret);
+                          cb(null, { col: `${mrID}-out`, gid: context.gid, key: null });
                         });
                     });
                   });
