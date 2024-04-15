@@ -5,20 +5,15 @@ const crawler = (keys, gid, cb) => {
       global.http.get(value, (res) => {
         let data = [];
         res.on('data', (chunk) => {
-          console.log(JSON.parse(chunk))
-          data.push(chunk);
+          data += chunk;
         });
   
         res.on('end', () => {
-          console.log("data")
-          // console.log(Object.keys(data))
-          // distribution[gid].store.put(data, {key: `${key}-crawled`});
+          distribution.local.store.put(data, {key: `${key}-crawled`}, (e, v) => {
+            return true;
+          });
         });
       });
-  
-      const o = {};
-      o[key] = `${key}-crawled`;
-      return o;
     };
   
     const cReduce = (key, values) => {
@@ -34,7 +29,6 @@ const crawler = (keys, gid, cb) => {
     };
   
     distribution[gid].mr.exec(config, (e, v) => {
-      console.log("herere")
       cb(e, v);
     });
 };

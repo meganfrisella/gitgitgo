@@ -77,9 +77,9 @@ afterAll((done) => {
 
 test('crawl', (done) => {
   let dataset = [
-    {1: 'http://cs.brown.edu/courses/csci1380/sandbox/1/level_1a/index.html'}, 
-    {2: 'http://cs.brown.edu/courses/csci1380/sandbox/1/level_1b/index.html'}, 
-    {3: 'http://cs.brown.edu/courses/csci1380/sandbox/1/level_1c/index.html'},
+    {1: 'https://raw.githubusercontent.com/brown-cs1380/m1/main/README.md'}, 
+    {2: 'https://raw.githubusercontent.com/brown-cs1380/m2/main/README.md'}, 
+    {3: 'https://raw.githubusercontent.com/brown-cs1380/m3/main/README.md'},
   ];
 
   const doMapReduce = (cb) => {

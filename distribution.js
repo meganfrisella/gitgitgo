@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const util = require('./distribution/util/util.js');
 const args = require('yargs').argv;
-global.http = require('http');
+global.https = require('https');
 
 // Default configuration
 global.nodeConfig = global.nodeConfig || {
