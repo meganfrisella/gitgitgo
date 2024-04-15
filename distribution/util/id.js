@@ -41,7 +41,6 @@ function idToNum(id) {
 }
 
 function naiveHash(kid, nids) {
-  console.log(idToNum(kid) % BigInt(nids.length));
   return nids[idToNum(kid) % BigInt(nids.length)];
 }
 

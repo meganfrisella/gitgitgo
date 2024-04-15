@@ -21,7 +21,6 @@ const comm = (config = { gid: "all" }) => {
               nodeToValue[sid] = v;
             }
             if (e) {
-              console.log(group[sid]);
               nodeToError[sid] = e;
             }
             if (cnt == numNodes) {
