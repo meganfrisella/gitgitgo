@@ -34,9 +34,11 @@ const start = (nodesConfigPath, main) => {
     gid: groupName,
   };
   distribution.node.start((server) => {
-    promisify(groupsTemplate(groupConfig).put)(groupConfig, group, (v) => {
-      main(server);
-    });
+    promisify(groupsTemplate(groupConfig).put)(groupConfig, group)
+      .then((v) => {
+        main(server);
+      })
+      .catch(console.error);
   });
 };
 

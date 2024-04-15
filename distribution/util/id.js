@@ -1,17 +1,17 @@
-var serialization = require('../util/serialization');
-var crypto = require('crypto');
-const assert = require('assert');
+var serialization = require("../util/serialization");
+var crypto = require("crypto");
+const assert = require("assert");
 
 // The ID is the SHA256 hash of the JSON representation of the object
 function getID(obj) {
-  const hash = crypto.createHash('sha256');
+  const hash = crypto.createHash("sha256");
   hash.update(serialization.serialize(obj));
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 // The NID is the SHA256 hash of the JSON representation of the node
 function getNID(node) {
-  node = {ip: node.ip, port: node.port};
+  node = { ip: node.ip, port: node.port };
   return getID(node);
 }
 
@@ -20,16 +20,29 @@ function getSID(node) {
   return getNID(node).substring(0, 5);
 }
 
+const hexToModuloN = (hex, n) => {
+  let result = 0;
+
+  // Process each character in the hex string
+  for (let i = 0; i < hex.length; i++) {
+    let char = hex[i];
+
+    let digitValue = parseInt(char, 16);
+
+    result = (result * 16 + digitValue) % n;
+  }
+
+  return result;
+};
 
 function idToNum(id) {
-  let n = parseInt(id, 16);
-  assert(!isNaN(n), 'idToNum: id is not in KID form!');
+  let n = BigInt("0x" + id);
   return n;
 }
 
 function naiveHash(kid, nids) {
-  nids.sort();
-  return nids[idToNum(kid) % nids.length];
+  console.log(idToNum(kid) % BigInt(nids.length));
+  return nids[idToNum(kid) % BigInt(nids.length)];
 }
 
 function consistentHash(kid, nids) {

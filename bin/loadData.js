@@ -26,7 +26,10 @@ const main = (server) => {
             col: "urls",
             key: name,
           }
-        ).catch(retry)
+        ).catch((e) => {
+          console.log(e);
+          retry(e);
+        })
       );
     })
     .then(() => {
