@@ -1,8 +1,8 @@
-global.nodeConfig = { ip: '127.0.0.1', port: 7070 };
-const distribution = require('../distribution');
+global.nodeConfig = { ip: "127.0.0.1", port: 7070 };
+const distribution = require("../distribution");
 const id = distribution.util.id;
 
-const groupsTemplate = require('../distribution/all/groups');
+const groupsTemplate = require("../distribution/all/groups");
 
 const ncdcGroup = {};
 const dlibGroup = {};
@@ -19,9 +19,9 @@ let localServer = null;
     The local node will be the orchestrator.
 */
 
-const n1 = { ip: '127.0.0.1', port: 7110 };
-const n2 = { ip: '127.0.0.1', port: 7111 };
-const n3 = { ip: '127.0.0.1', port: 7112 };
+const n1 = { ip: "127.0.0.1", port: 7110 };
+const n2 = { ip: "127.0.0.1", port: 7111 };
+const n3 = { ip: "127.0.0.1", port: 7112 };
 
 beforeAll((done) => {
   /* Stop the nodes if they are running */
@@ -47,10 +47,10 @@ beforeAll((done) => {
   distribution.node.start((server) => {
     localServer = server;
 
-    const ncdcConfig = { gid: 'ncdc' };
+    const ncdcConfig = { gid: "ncdc" };
     startNodes(() => {
       groupsTemplate(ncdcConfig).put(ncdcConfig, ncdcGroup, (e, v) => {
-        const dlibConfig = { gid: 'dlib' };
+        const dlibConfig = { gid: "dlib" };
         groupsTemplate(dlibConfig).put(dlibConfig, dlibGroup, (e, v) => {
           done();
         });
@@ -60,7 +60,7 @@ beforeAll((done) => {
 });
 
 afterAll((done) => {
-  let remote = { service: 'status', method: 'stop' };
+  let remote = { service: "status", method: "stop" };
   remote.node = n1;
   distribution.local.comm.send([], remote, (e, v) => {
     remote.node = n2;
@@ -76,7 +76,8 @@ afterAll((done) => {
 
 function sanityCheck(mapper, reducer, dataset, expected, done) {
   let mapped = dataset.map((o) =>
-    mapper(Object.keys(o)[0], o[Object.keys(o)[0]]));
+    mapper(Object.keys(o)[0], o[Object.keys(o)[0]])
+  );
   /* Flatten the array. */
   mapped = mapped.flat();
   let shuffled = mapped.reduce((a, b) => {
@@ -96,26 +97,29 @@ function sanityCheck(mapper, reducer, dataset, expected, done) {
 
 // ---all.mr---
 
-test('(25 pts) all.mr:ncdc', (done) => {
-  let m1 = (key, value, cb) => {
-    let words = value.split(/(\s+)/).filter((e) => e !== ' ');
+test("(25 pts) all.mr:ncdc", (done) => {
+  let m1 = (key, value, state, cb) => {
+    let words = value.split(/(\s+)/).filter((e) => e !== " ");
     cb([[words[1], parseInt(words[3])]]);
   };
 
-  let r1 = (key, values, cb) => {
+  let r1 = (key, values, state, cb) => {
     let res = values.reduce((a, b) => Math.max(a, b), -Infinity);
     cb(res);
   };
 
   let dataset = [
-    { '000': '006701199099999 1950 0515070049999999N9 +0000 1+9999' },
-    { '106': '004301199099999 1950 0515120049999999N9 +0022 1+9999' },
-    { '212': '004301199099999 1950 0515180049999999N9 -0011 1+9999' },
-    { '318': '004301265099999 1949 0324120040500001N9 +0111 1+9999' },
-    { '424': '004301265099999 1949 0324180040500001N9 +0078 1+9999' },
+    { "000": "006701199099999 1950 0515070049999999N9 +0000 1+9999" },
+    { 106: "004301199099999 1950 0515120049999999N9 +0022 1+9999" },
+    { 212: "004301199099999 1950 0515180049999999N9 -0011 1+9999" },
+    { 318: "004301265099999 1949 0324120040500001N9 +0111 1+9999" },
+    { 424: "004301265099999 1949 0324180040500001N9 +0078 1+9999" },
   ];
 
-  let expected = [['1950', 22], ['1949', 111]];
+  let expected = [
+    ["1950", 22],
+    ["1949", 111],
+  ];
 
   /* Sanity check: map and reduce locally */
   // sanityCheck(m1, r1, dataset, expected, done);
@@ -129,27 +133,30 @@ test('(25 pts) all.mr:ncdc', (done) => {
         done(e);
       }
 
-      distribution.ncdc.mr.exec({ keys: v, map: m1, reduce: r1 }, (e, distribKey) => {
-        distribution.ncdc.store.get(distribKey, (e, keys) => {
-          let cnt = 0;
-          let out = [];
-          keys.forEach((key) => {
-            distribKey.key = key;
-            distribution.ncdc.store.get(distribKey, (e, v) => {
-              out.push([key, v]);
-              cnt++;
-              if (cnt == keys.length) {
-                try {
-                  expect(out).toEqual(expect.arrayContaining(expected));
-                  done();
-                } catch (e) {
-                  done(e);
+      distribution.ncdc.mr.exec(
+        { keys: v, map: m1, reduce: r1 },
+        (e, distribKey) => {
+          distribution.ncdc.store.get(distribKey, (e, keys) => {
+            let cnt = 0;
+            let out = [];
+            keys.forEach((key) => {
+              distribKey.key = key;
+              distribution.ncdc.store.get(distribKey, (e, v) => {
+                out.push([key, v]);
+                cnt++;
+                if (cnt == keys.length) {
+                  try {
+                    expect(out).toEqual(expect.arrayContaining(expected));
+                    done();
+                  } catch (e) {
+                    done(e);
+                  }
                 }
-              }
+              });
             });
           });
-        });
-      });
+        }
+      );
     });
   };
 
@@ -169,10 +176,10 @@ test('(25 pts) all.mr:ncdc', (done) => {
   });
 });
 
-test('(25 pts) all.mr:dlib', (done) => {
-  let m2 = (key, value, cb) => {
+test("(25 pts) all.mr:dlib", (done) => {
+  let m2 = (key, value, state, cb) => {
     // map each word to a key-value pair like {word: 1}
-    let words = value.split(/(\s+)/).filter((e) => e !== ' ');
+    let words = value.split(/(\s+)/).filter((e) => e !== " ");
     let out = [];
     words.forEach((w) => {
       out.push([w, 1]);
@@ -180,30 +187,40 @@ test('(25 pts) all.mr:dlib', (done) => {
     cb(out);
   };
 
-  let r2 = (key, values, cb) => {
+  let r2 = (key, values, state, cb) => {
     cb(values.length);
   };
 
   let dataset = [
-    { 'b1-l1': 'It was the best of times, it was the worst of times,' },
-    { 'b1-l2': 'it was the age of wisdom, it was the age of foolishness,' },
-    { 'b1-l3': 'it was the epoch of belief, it was the epoch of incredulity,' },
-    { 'b1-l4': 'it was the season of Light, it was the season of Darkness,' },
-    { 'b1-l5': 'it was the spring of hope, it was the winter of despair,' },
+    { "b1-l1": "It was the best of times, it was the worst of times," },
+    { "b1-l2": "it was the age of wisdom, it was the age of foolishness," },
+    { "b1-l3": "it was the epoch of belief, it was the epoch of incredulity," },
+    { "b1-l4": "it was the season of Light, it was the season of Darkness," },
+    { "b1-l5": "it was the spring of hope, it was the winter of despair," },
   ];
 
   let expected = [
-    ['It', 1], ['was', 10],
-    ['the', 10], ['best', 1],
-    ['of', 10], ['times,', 2],
-    ['it', 9], ['worst', 1],
-    ['age', 2], ['wisdom,', 1],
-    ['foolishness,', 1], ['epoch', 2],
-    ['belief,', 1], ['incredulity,', 1],
-    ['season', 2], ['Light,', 1],
-    ['Darkness,', 1], ['spring', 1],
-    ['hope,', 1], ['winter', 1],
-    ['despair,', 1],
+    ["It", 1],
+    ["was", 10],
+    ["the", 10],
+    ["best", 1],
+    ["of", 10],
+    ["times,", 2],
+    ["it", 9],
+    ["worst", 1],
+    ["age", 2],
+    ["wisdom,", 1],
+    ["foolishness,", 1],
+    ["epoch", 2],
+    ["belief,", 1],
+    ["incredulity,", 1],
+    ["season", 2],
+    ["Light,", 1],
+    ["Darkness,", 1],
+    ["spring", 1],
+    ["hope,", 1],
+    ["winter", 1],
+    ["despair,", 1],
   ];
 
   /* Sanity check: map and reduce locally */
@@ -213,32 +230,36 @@ test('(25 pts) all.mr:dlib', (done) => {
   const doMapReduce = (cb) => {
     distribution.dlib.store.get({ key: null }, (e, v) => {
       try {
+        console.log(e);
         expect(v.length).toBe(dataset.length);
       } catch (e) {
         done(e);
       }
 
-      distribution.dlib.mr.exec({ keys: v, map: m2, reduce: r2 }, (e, distribKey) => {
-        distribution.dlib.store.get(distribKey, (e, keys) => {
-          let cnt = 0;
-          let out = [];
-          keys.forEach((key) => {
-            distribKey.key = key;
-            distribution.dlib.store.get(distribKey, (e, v) => {
-              out.push([key, v]);
-              cnt++;
-              if (cnt == keys.length) {
-                try {
-                  expect(out).toEqual(expect.arrayContaining(expected));
-                  done();
-                } catch (e) {
-                  done(e);
+      distribution.dlib.mr.exec(
+        { keys: v, map: m2, reduce: r2 },
+        (e, distribKey) => {
+          distribution.dlib.store.get(distribKey, (e, keys) => {
+            let cnt = 0;
+            let out = [];
+            keys.forEach((key) => {
+              distribKey.key = key;
+              distribution.dlib.store.get(distribKey, (e, v) => {
+                out.push([key, v]);
+                cnt++;
+                if (cnt == keys.length) {
+                  try {
+                    expect(out).toEqual(expect.arrayContaining(expected));
+                    done();
+                  } catch (e) {
+                    done(e);
+                  }
                 }
-              }
+              });
             });
           });
-        });
-      });
+        }
+      );
     });
   };
 

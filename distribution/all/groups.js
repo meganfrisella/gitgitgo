@@ -20,7 +20,7 @@ const groups = (config = { gid: 'all' }) => {
       } else {
         key = config;
       }
-      console.log(`putting group ${key} on group ${context.gid}`);
+      // console.log(`putting group ${key} on group ${context.gid}`);
       distribution.local.groups.put(key, group, (e, v) => {
         let remote = { service: 'groups', method: 'put' };
         distribution[context.gid].comm.send([key, group], remote, cb);
