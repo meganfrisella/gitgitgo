@@ -11,6 +11,7 @@ console.log(`Loaded ${repositories.length} URLs from file`);
 const main = (server) => {
   PromisePool.for(repositories)
     .withConcurrency(100)
+    .handleError(console.error)
     .process((repo) => {
       const name = repo.name;
       const branch = repo["default_branch"];
@@ -39,7 +40,6 @@ const main = (server) => {
       console.log(`Put ${v.length} URLs in distributed store`);
       console.log(v.slice(0, 10));
     })
-    .catch(console.error)
     .finally(() => server.close());
 };
 

@@ -3,7 +3,8 @@ const args = require("yargs").argv;
 const { start, promisify } = require("./lib");
 
 const main = (server) => {
-  const map = (key, value, cb) => {
+  const map = (key, value, state, cb) => {
+    const limiter = state.getLimiter();
     const promiseRetry = require("promise-retry");
     promiseRetry(
       {
@@ -11,18 +12,20 @@ const main = (server) => {
         factor: 4,
       },
       (retry) => {
-        return this.limiter.schedule(fetch(value.url)).then((res) => {
-          if (!res.ok) {
-            if (res.status === 404) {
-              throw new Error(`Failed to fetch ${value.url}: 404 Not Found`);
-            } else {
-              return retry(
-                new Error(`Failed to fetch ${value.url}: ${res.statusText}`)
-              );
+        return limiter
+          .schedule(() => fetch(value.url))
+          .then((res) => {
+            if (!res.ok) {
+              if (res.status === 404) {
+                throw new Error(`Failed to fetch ${value.url}: 404 Not Found`);
+              } else {
+                return retry(
+                  new Error(`Failed to fetch ${value.url}: ${res.statusText}`)
+                );
+              }
             }
-          }
-          return res.text();
-        });
+            return res.text();
+          });
       }
     )
       .then((body) => {
@@ -44,6 +47,7 @@ const main = (server) => {
   const reduce = (key, values, cb) => {
     cb(values[0]);
   };
+
   promisify(distribution.main.store.get)({
     key: null,
     col: "urls",
@@ -56,8 +60,14 @@ const main = (server) => {
         reduce,
         state: {
           getLimiter: () => {
-            if (!this.limiter)
-              this.limiter = new Bottleneck({ maxConcurrent: 10 });
+            const Bottleneck = require("bottleneck/es5");
+            if (!this.limiter) {
+              const nRequestsPerHour = 4000;
+              const minTime = 1000 / (nRequestsPerHour / 60 / 60);
+              this.limiter = new Bottleneck({ minTime });
+            }
+
+            return this.limiter;
           },
         },
       })

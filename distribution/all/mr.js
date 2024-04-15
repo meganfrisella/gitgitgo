@@ -20,7 +20,6 @@ const mr = function (config = { gid: "all" }) {
           const { PromisePool } = require("@supercharge/promise-pool");
           const { promisify, promisifySingle } = require("../util/util.js");
           let err = [];
-          console.log("MAPPING");
           PromisePool.for(keys)
             .withConcurrency(10)
             .handleError((e) => err.push(e))
@@ -55,7 +54,6 @@ const mr = function (config = { gid: "all" }) {
         shuffle: function (gid, col, mrID, cb = function () {}) {
           const { PromisePool } = require("@supercharge/promise-pool");
           const { promisify, promisifySingle } = require("../util/util.js");
-          console.log("SHUFFLING");
 
           let err = [];
           promisify(distribution.local.store.get)({
@@ -86,7 +84,6 @@ const mr = function (config = { gid: "all" }) {
         },
 
         reduce: function (gid, col, mrID, cb = function () {}) {
-          console.log("REDUCING");
           const { PromisePool } = require("@supercharge/promise-pool");
           const { promisify, promisifySingle } = require("../util/util.js");
           const nodeDir = require("path").join(
@@ -101,7 +98,6 @@ const mr = function (config = { gid: "all" }) {
             col: `${mrID}-reduce`,
           })
             .then((keys) => {
-              console.log(keys);
               return PromisePool.for(keys)
                 .withConcurrency(10)
                 .handleError((e) => err.push(e))
