@@ -24,7 +24,6 @@ comm.send = function (msg, rem, cb = defaultCallback) {
     });
   });
   req.on("error", (err) => {
-    console.error(err);
     cb(new Error("failed to connect to node."), null);
   });
   req.write(msgSer);
