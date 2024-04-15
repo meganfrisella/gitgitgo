@@ -20,7 +20,7 @@ global.nodeState = {};
     This is just to allow for you to easily startup nodes from the terminal.
 
     Usage:
-    ./distribution.js --ip '127.0.0.1' --port 1234
+    node distribution.js --ip '127.0.0.1' --port 1234
   */
 if (args.ip) {
   global.nodeConfig.ip = args.ip;
