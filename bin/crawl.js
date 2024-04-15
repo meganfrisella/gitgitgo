@@ -44,7 +44,7 @@ const main = (server) => {
         cb([]);
       });
   };
-  const reduce = (key, values, cb) => {
+  const reduce = (key, values, state, cb) => {
     cb(values[0]);
   };
 
