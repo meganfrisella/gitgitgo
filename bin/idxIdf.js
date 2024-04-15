@@ -1,10 +1,8 @@
-const { PromisePool } = require("@supercharge/promise-pool");
-const args = require("yargs").argv;
-const { start, promisify } = require("./lib");
+const { promisify } = require("./lib");
 
-const indexIdf = (interName) => {
+const indexIdf = (interName, megaCb) => {
   // key="word", value=[(doc1, tf), (doc2, tf)...]
-  const map = (key, value, cb) => { 
+  const map = (key, value, state, cb) => { 
     const totalDocs = 10; // TODO: total doc num? 
     const docsWithTerm = value.length;
     const idf = Math.log((totalDocs + 1) / (docsWithTerm + 1));
@@ -15,7 +13,7 @@ const indexIdf = (interName) => {
   };
 
   // key="word", value=[(doc1, tfidf), (doc2, tfidf)...]
-  const reduce = (key, values, cb) => {
+  const reduce = (key, values, state, cb) => {
     cb(values.sort((a, b) => b.tfidf - a.tfidf));
   };
   
@@ -37,12 +35,11 @@ const indexIdf = (interName) => {
         },
       })
     )
-    .then((v) => promisify(distribution.main.store.get)(v))
-    .then((v) => {
-      console.log(v.length);
+    .then((v) => megaCb(null, v))
+    .catch((e) => {
+      console.error(e);
+      megaCb(e, null);
     })
-    .catch((e) => console.error(e))
-    // .finally(() => server.close());
 };
 
 module.exports = {indexIdf};

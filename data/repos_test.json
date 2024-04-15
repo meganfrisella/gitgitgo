@@ -1,0 +1,38 @@
+[
+  {
+    "name": "freeCodeCamp/freeCodeCamp",
+    "stars": 387020,
+    "default_branch": "main",
+    "description": "freeCodeCamp.org's open-source codebase and curriculum. Learn to code for free."
+  },
+  {
+    "name": "sindresorhus/awesome",
+    "stars": 298218,
+    "default_branch": "main",
+    "description": "\ud83d\ude0e Awesome lists about all kinds of interesting topics"
+  },
+  {
+    "name": "public-apis/public-apis",
+    "stars": 290950,
+    "default_branch": "master",
+    "description": "A collective list of free APIs"
+  },
+  {
+    "name": "jwasham/coding-interview-university",
+    "stars": 282020,
+    "default_branch": "main",
+    "description": "A complete computer science study plan to become a software engineer."
+  },
+  {
+    "name": "kamranahmedse/developer-roadmap",
+    "stars": 273251,
+    "default_branch": "master",
+    "description": "Interactive roadmaps, guides and other educational content to help developers grow in their careers."
+  },
+  {
+    "name": "996icu/996.ICU",
+    "stars": 268993,
+    "default_branch": "master",
+    "description": "Repo for counting stars and contributing. Press F to pay respect to glorious developers."
+  }
+]

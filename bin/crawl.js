@@ -1,6 +1,4 @@
-const { PromisePool } = require("@supercharge/promise-pool");
-const args = require("yargs").argv;
-const { start, promisify } = require("./lib");
+const { promisify } = require("./lib");
 
 const crawler = (megaCb) => {
   const map = (key, value, state, cb) => {
@@ -30,13 +28,7 @@ const crawler = (megaCb) => {
     )
       .then((body) => {
         cb([
-          [
-            key,
-            {
-              body,
-              description: value.description,
-            },
-          ],
+          [key, { body, description: value.description }],
         ]);
       })
       .catch((e) => {
@@ -73,7 +65,6 @@ const crawler = (megaCb) => {
         },
       })
     )
-    // .then((v) => promisify(distribution.main.store.get)(v))
     .then((v) => megaCb(null, v))
     .catch((e) => {
       console.error(e);
