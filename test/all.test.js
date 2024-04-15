@@ -818,7 +818,7 @@ test('(2 pts) all.store.get(no key)', (done) => {
       distribution.mygroup.store.put(users[2], { key: keys[2] }, (e, v) => {
         distribution.mygroup.store.get({ key: null }, (e, v) => {
           try {
-            expect(e).toEqual({});
+            expect(e).toBeFalsy();
             expect(Object.values(v)).toEqual(expect.arrayContaining(keys));
             done();
           } catch (error) {

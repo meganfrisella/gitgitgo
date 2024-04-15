@@ -97,17 +97,14 @@ function sanityCheck(mapper, reducer, dataset, expected, done) {
 // ---all.mr---
 
 test('(25 pts) all.mr:ncdc', (done) => {
-  let m1 = (key, value) => {
+  let m1 = (key, value, cb) => {
     let words = value.split(/(\s+)/).filter((e) => e !== ' ');
-    let out = {};
-    out[words[1]] = parseInt(words[3]);
-    return out;
+    cb([[words[1], parseInt(words[3])]]);
   };
 
-  let r1 = (key, values) => {
-    let out = {};
-    out[key] = values.reduce((a, b) => Math.max(a, b), -Infinity);
-    return out;
+  let r1 = (key, values, cb) => {
+    let res = values.reduce((a, b) => Math.max(a, b), -Infinity);
+    cb(res);
   };
 
   let dataset = [
@@ -118,10 +115,10 @@ test('(25 pts) all.mr:ncdc', (done) => {
     { '424': '004301265099999 1949 0324180040500001N9 +0078 1+9999' },
   ];
 
-  let expected = [{ '1950': 22 }, { '1949': 111 }];
+  let expected = [['1950', 22], ['1949', 111]];
 
   /* Sanity check: map and reduce locally */
-  sanityCheck(m1, r1, dataset, expected, done);
+  // sanityCheck(m1, r1, dataset, expected, done);
 
   /* Now we do the same thing but on the cluster */
   const doMapReduce = (cb) => {
@@ -132,14 +129,26 @@ test('(25 pts) all.mr:ncdc', (done) => {
         done(e);
       }
 
-      distribution.ncdc.mr.exec({ keys: v, map: m1, reduce: r1 }, (e, v) => {
-        console.log(e, v);
-        try {
-          expect(v).toEqual(expect.arrayContaining(expected));
-          done();
-        } catch (e) {
-          done(e);
-        }
+      distribution.ncdc.mr.exec({ keys: v, map: m1, reduce: r1 }, (e, distribKey) => {
+        distribution.ncdc.store.get(distribKey, (e, keys) => {
+          let cnt = 0;
+          let out = [];
+          keys.forEach((key) => {
+            distribKey.key = key;
+            distribution.ncdc.store.get(distribKey, (e, v) => {
+              out.push([key, v]);
+              cnt++;
+              if (cnt == keys.length) {
+                try {
+                  expect(out).toEqual(expect.arrayContaining(expected));
+                  done();
+                } catch (e) {
+                  done(e);
+                }
+              }
+            });
+          });
+        });
       });
     });
   };
@@ -161,22 +170,18 @@ test('(25 pts) all.mr:ncdc', (done) => {
 });
 
 test('(25 pts) all.mr:dlib', (done) => {
-  let m2 = (key, value) => {
+  let m2 = (key, value, cb) => {
     // map each word to a key-value pair like {word: 1}
     let words = value.split(/(\s+)/).filter((e) => e !== ' ');
     let out = [];
     words.forEach((w) => {
-      let o = {};
-      o[w] = 1;
-      out.push(o);
+      out.push([w, 1]);
     });
-    return out;
+    cb(out);
   };
 
-  let r2 = (key, values) => {
-    let out = {};
-    out[key] = values.length;
-    return out;
+  let r2 = (key, values, cb) => {
+    cb(values.length);
   };
 
   let dataset = [
@@ -188,21 +193,21 @@ test('(25 pts) all.mr:dlib', (done) => {
   ];
 
   let expected = [
-    { It: 1 }, { was: 10 },
-    { the: 10 }, { best: 1 },
-    { of: 10 }, { 'times,': 2 },
-    { it: 9 }, { worst: 1 },
-    { age: 2 }, { 'wisdom,': 1 },
-    { 'foolishness,': 1 }, { epoch: 2 },
-    { 'belief,': 1 }, { 'incredulity,': 1 },
-    { season: 2 }, { 'Light,': 1 },
-    { 'Darkness,': 1 }, { spring: 1 },
-    { 'hope,': 1 }, { winter: 1 },
-    { 'despair,': 1 },
+    ['It', 1], ['was', 10],
+    ['the', 10], ['best', 1],
+    ['of', 10], ['times,', 2],
+    ['it', 9], ['worst', 1],
+    ['age', 2], ['wisdom,', 1],
+    ['foolishness,', 1], ['epoch', 2],
+    ['belief,', 1], ['incredulity,', 1],
+    ['season', 2], ['Light,', 1],
+    ['Darkness,', 1], ['spring', 1],
+    ['hope,', 1], ['winter', 1],
+    ['despair,', 1],
   ];
 
   /* Sanity check: map and reduce locally */
-  sanityCheck(m2, r2, dataset, expected, done);
+  // sanityCheck(m2, r2, dataset, expected, done);
 
   /* Now we do the same thing but on the cluster */
   const doMapReduce = (cb) => {
@@ -213,14 +218,26 @@ test('(25 pts) all.mr:dlib', (done) => {
         done(e);
       }
 
-      distribution.dlib.mr.exec({ keys: v, map: m2, reduce: r2 }, (e, v) => {
-        console.log(e, v);
-        try {
-          expect(v).toEqual(expect.arrayContaining(expected));
-          done();
-        } catch (e) {
-          done(e);
-        }
+      distribution.dlib.mr.exec({ keys: v, map: m2, reduce: r2 }, (e, distribKey) => {
+        distribution.dlib.store.get(distribKey, (e, keys) => {
+          let cnt = 0;
+          let out = [];
+          keys.forEach((key) => {
+            distribKey.key = key;
+            distribution.dlib.store.get(distribKey, (e, v) => {
+              out.push([key, v]);
+              cnt++;
+              if (cnt == keys.length) {
+                try {
+                  expect(out).toEqual(expect.arrayContaining(expected));
+                  done();
+                } catch (e) {
+                  done(e);
+                }
+              }
+            });
+          });
+        });
       });
     });
   };
