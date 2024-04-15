@@ -1,9 +1,8 @@
 const { PromisePool } = require("@supercharge/promise-pool");
 const args = require("yargs").argv;
 const { start, promisify } = require("./lib");
-const { indexTf } = require("./index_tf");
 
-const main = (server, arg=null) => {
+const crawler = (megaCb) => {
   const map = (key, value, state, cb) => {
     const limiter = state.getLimiter();
     const promiseRetry = require("promise-retry");
@@ -45,6 +44,7 @@ const main = (server, arg=null) => {
         cb([]);
       });
   };
+
   const reduce = (key, values, state, cb) => {
     cb(values[0]);
   };
@@ -74,11 +74,12 @@ const main = (server, arg=null) => {
       })
     )
     // .then((v) => promisify(distribution.main.store.get)(v))
-    .then((v) => {
-      indexTf(v);
+    .then((v) => megaCb(null, v))
+    .catch((e) => {
+      console.error(e);
+      megaCb(e, null);
     })
-    .catch((e) => console.error(e))
-    .finally(() => server.close());
 };
 
-start(args.nodesConfig || "data/nodesConfig.json", main);
+module.exports = {crawler};
+

@@ -2,12 +2,15 @@ const { PromisePool } = require("@supercharge/promise-pool");
 const args = require("yargs").argv;
 const { start, promisify } = require("./lib");
 
-const indexTf = (interName) => {
+const indexTf = (interName, megaCb) => {
   // key="doc1", value={body:"", description:""}
   const map = (key, value, cb) => {
+    console.log("tfMappppp")
     // process text
     const text = value.body + value.description;
     text.toLowerCase().match(/\b\w+\b/g);
+
+    console.log(text)
 
     // get each word frequency
     const wordFrequency = {};
@@ -22,6 +25,7 @@ const indexTf = (interName) => {
         const tf = wordFrequency[word] / totalWords;
         tfScores.push({"docName": key, "tf": tf})
     });
+    console.log(tfScores)
     cb([tfScores]);
   };
 
@@ -43,11 +47,16 @@ const indexTf = (interName) => {
         state: {},
       })
     )
-    .then((v) => promisify(distribution.main.store.get)(v))
-    .then((v) => {
-      console.log(v.length);
+    // .then((v) => promisify(distribution.main.store.get)(v))
+    // .then((v) => {
+    //   console.log(v.length);
+    // })
+    // .catch((e) => console.error(e))
+    .then((v) => megaCb(null, v))
+    .catch((e) => {
+      console.error(e);
+      megaCb(e, null);
     })
-    .catch((e) => console.error(e))
     // .finally(() => server.close());
 };
 
