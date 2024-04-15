@@ -75,52 +75,13 @@ afterAll((done) => {
   });
 });
 
-function sanityCheck(mapper, reducer, dataset, expected, done) {
-  let mapped = dataset.map((o) =>
-    mapper(Object.keys(o)[0], o[Object.keys(o)[0]]));
-  /* Flatten the array. */
-  mapped = mapped.flat();
-  let shuffled = mapped.reduce((a, b) => {
-    let key = Object.keys(b)[0];
-    if (a[key] === undefined) a[key] = [];
-    a[key].push(b[key]);
-    return a;
-  }, {});
-  let reduced = Object.keys(shuffled).map((k) => reducer(k, shuffled[k]));
-
-  try {
-    expect(reduced).toEqual(expect.arrayContaining(expected));
-  } catch (e) {
-    done(e);
-  }
-}
-
-test('(25 pts) all.mr:ncdc', (done) => {
-  // let m1 = (key, value) => {
-  //   let words = value.split(/(\s+)/).filter((e) => e !== ' ');
-  //   let out = {};
-  //   out[words[1]] = parseInt(words[3]);
-  //   return out;
-  // };
-
-  // let r1 = (key, values) => {
-  //   let out = {};
-  //   out[key] = values.reduce((a, b) => Math.max(a, b), -Infinity);
-  //   return out;
-  // };
-
+test('crawl', (done) => {
   let dataset = [
     {1: 'http://cs.brown.edu/courses/csci1380/sandbox/1/level_1a/index.html'}, 
     {2: 'http://cs.brown.edu/courses/csci1380/sandbox/1/level_1b/index.html'}, 
     {3: 'http://cs.brown.edu/courses/csci1380/sandbox/1/level_1c/index.html'},
   ];
 
-  let expected = [{ '1950': 22 }, { '1949': 111 }];
-
-  /* Sanity check: map and reduce locally */
-  sanityCheck(m1, r1, dataset, expected, done);
-
-  /* Now we do the same thing but on the cluster */
   const doMapReduce = (cb) => {
     distribution.ncdc.store.get({ key: null }, (e, v) => {
       try {
@@ -129,26 +90,15 @@ test('(25 pts) all.mr:ncdc', (done) => {
         done(e);
       }
 
-      crawler(v, (e, v) => {
+      crawler(v, 'ncdc', (e, v) => {
         console.log(e)
         console.log(v)
         done();
       })
-
-      // distribution.ncdc.mr.exec({ keys: v, map: m1, reduce: r1 }, (e, v) => {
-      //   console.log(e, v);
-      //   try {
-      //     expect(v).toEqual(expect.arrayContaining(expected));
-      //     done();
-      //   } catch (e) {
-      //     done(e);
-      //   }
-      // });
     });
   };
 
   let cntr = 0;
-
   // We send the dataset to the cluster
   dataset.forEach((o) => {
     let key = Object.keys(o)[0];

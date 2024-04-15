@@ -1,35 +1,40 @@
-const crawler = (keys, cb) => {
-    const map = (key, value) => {
-      const http = require('http');
-      http.get(value, (res) => {
+const crawler = (keys, gid, cb) => {
+    const cMap = (key, value, gid) => {
+      console.log('calling http get');
+
+      global.http.get(value, (res) => {
         let data = [];
         res.on('data', (chunk) => {
+          console.log(JSON.parse(chunk))
           data.push(chunk);
         });
   
         res.on('end', () => {
-          distribution['crawler'].store.put(data, `${key}-download`);
+          console.log("data")
+          // console.log(Object.keys(data))
+          // distribution[gid].store.put(data, {key: `${key}-crawled`});
         });
       });
   
       const o = {};
-      o[key] = `${key}-download`;
+      o[key] = `${key}-crawled`;
       return o;
     };
   
-    const reduce = (key, values) => {
+    const cReduce = (key, values) => {
       const o = {};
       o[key] = values[0];
       return o;
     };
   
     const config = {
-      map,
-      reduce,
-      keys
+      map: cMap,
+      reduce: cReduce,
+      keys: keys,
     };
   
-    distribution['crawler'].mr.exec(config, (e, v) => {
+    distribution[gid].mr.exec(config, (e, v) => {
+      console.log("herere")
       cb(e, v);
     });
 };
