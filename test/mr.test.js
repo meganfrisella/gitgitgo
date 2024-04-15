@@ -98,14 +98,12 @@ function sanityCheck(mapper, reducer, dataset, expected, done) {
 // ---all.mr---
 
 test("(25 pts) all.mr:ncdc", (done) => {
-  let m1 = (key, value, cb) => {
-    console.log("MAPPING");
+  let m1 = (key, value, state, cb) => {
     let words = value.split(/(\s+)/).filter((e) => e !== " ");
     cb([[words[1], parseInt(words[3])]]);
   };
 
-  let r1 = (key, values, cb) => {
-    console.log("REDUCING");
+  let r1 = (key, values, state, cb) => {
     let res = values.reduce((a, b) => Math.max(a, b), -Infinity);
     cb(res);
   };
@@ -139,7 +137,6 @@ test("(25 pts) all.mr:ncdc", (done) => {
         { keys: v, map: m1, reduce: r1 },
         (e, distribKey) => {
           distribution.ncdc.store.get(distribKey, (e, keys) => {
-            console.log(keys);
             let cnt = 0;
             let out = [];
             keys.forEach((key) => {
@@ -180,7 +177,7 @@ test("(25 pts) all.mr:ncdc", (done) => {
 });
 
 test("(25 pts) all.mr:dlib", (done) => {
-  let m2 = (key, value, cb) => {
+  let m2 = (key, value, state, cb) => {
     // map each word to a key-value pair like {word: 1}
     let words = value.split(/(\s+)/).filter((e) => e !== " ");
     let out = [];
@@ -190,7 +187,7 @@ test("(25 pts) all.mr:dlib", (done) => {
     cb(out);
   };
 
-  let r2 = (key, values, cb) => {
+  let r2 = (key, values, state, cb) => {
     cb(values.length);
   };
 
@@ -233,6 +230,7 @@ test("(25 pts) all.mr:dlib", (done) => {
   const doMapReduce = (cb) => {
     distribution.dlib.store.get({ key: null }, (e, v) => {
       try {
+        console.log(e);
         expect(v.length).toBe(dataset.length);
       } catch (e) {
         done(e);

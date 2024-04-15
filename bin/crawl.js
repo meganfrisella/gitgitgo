@@ -8,16 +8,21 @@ const main = (server) => {
     promiseRetry(
       {
         retries: 3,
+        factor: 4,
       },
       (retry) => {
-        fetch(value.url)
-          .then((res) => {
-            if (!res.ok) {
-              throw new Error(`Failed to fetch ${value.url}`);
+        return this.limiter.schedule(fetch(value.url)).then((res) => {
+          if (!res.ok) {
+            if (res.status === 404) {
+              throw new Error(`Failed to fetch ${value.url}: 404 Not Found`);
+            } else {
+              return retry(
+                new Error(`Failed to fetch ${value.url}: ${res.statusText}`)
+              );
             }
-            return res.text();
-          })
-          .catch(retry);
+          }
+          return res.text();
+        });
       }
     )
       .then((body) => {
@@ -49,6 +54,12 @@ const main = (server) => {
         col: "urls",
         map,
         reduce,
+        state: {
+          getLimiter: () => {
+            if (!this.limiter)
+              this.limiter = new Bottleneck({ maxConcurrent: 10 });
+          },
+        },
       })
     )
     .then((v) => promisify(distribution.main.store.get)(v))

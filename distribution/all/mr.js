@@ -1,4 +1,3 @@
-const { promisifySingle } = require("../util/util.js");
 const id = require("../util/id.js");
 const crypto = require("crypto");
 
@@ -11,25 +10,26 @@ const mr = function (config = { gid: "all" }) {
   return {
     exec: (mrConfig, cb = defaultCallback) => {
       const mrID = `mr-${crypto.randomUUID()}`;
-
+      const col = mrConfig.col || "default";
       mrSvc = {
-        col: mrConfig.col || "default",
+        state: mrConfig.state || {},
         mapper: mrConfig.map,
         reducer: mrConfig.reduce,
 
-        map: function (keys, gid, mrID, cb = function () {}) {
+        map: function (keys, gid, col, mrID, cb = function () {}) {
           const { PromisePool } = require("@supercharge/promise-pool");
           const { promisify, promisifySingle } = require("../util/util.js");
           let err = [];
+          console.log("MAPPING");
           PromisePool.for(keys)
             .withConcurrency(10)
             .handleError((e) => err.push(e))
             .process((key) =>
               promisify(distribution[gid].store.get)({
                 key: key,
-                col: this.col,
+                col,
               })
-                .then((v) => promisifySingle(this.mapper)(key, v))
+                .then((v) => promisifySingle(this.mapper)(key, v, this.state))
                 .then((res) => {
                   return PromisePool.for(res)
                     .withConcurrency(2)
@@ -52,9 +52,10 @@ const mr = function (config = { gid: "all" }) {
             });
         },
 
-        shuffle: function (gid, mrID, cb = function () {}) {
+        shuffle: function (gid, col, mrID, cb = function () {}) {
           const { PromisePool } = require("@supercharge/promise-pool");
           const { promisify, promisifySingle } = require("../util/util.js");
+          console.log("SHUFFLING");
 
           let err = [];
           promisify(distribution.local.store.get)({
@@ -67,7 +68,7 @@ const mr = function (config = { gid: "all" }) {
                 .withConcurrency(10)
                 .handleError((e) => err.push(e))
                 .process((key) => {
-                  promisify(distribution.local.store.get)({
+                  return promisify(distribution.local.store.get)({
                     key: key,
                     gid: gid,
                     col: `${mrID}-map`,
@@ -84,7 +85,8 @@ const mr = function (config = { gid: "all" }) {
             .catch((e) => cb(e, null));
         },
 
-        reduce: function (gid, mrID, cb = function () {}) {
+        reduce: function (gid, col, mrID, cb = function () {}) {
+          console.log("REDUCING");
           const { PromisePool } = require("@supercharge/promise-pool");
           const { promisify, promisifySingle } = require("../util/util.js");
           const nodeDir = require("path").join(
@@ -99,6 +101,7 @@ const mr = function (config = { gid: "all" }) {
             col: `${mrID}-reduce`,
           })
             .then((keys) => {
+              console.log(keys);
               return PromisePool.for(keys)
                 .withConcurrency(10)
                 .handleError((e) => err.push(e))
@@ -108,7 +111,9 @@ const mr = function (config = { gid: "all" }) {
                     gid: gid,
                     col: `${mrID}-reduce`,
                   })
-                    .then((vals) => promisifySingle(this.reducer)(key, vals))
+                    .then((vals) =>
+                      promisifySingle(this.reducer)(key, vals, this.state)
+                    )
                     .then((res) =>
                       promisify(distribution.local.store.put)(res, {
                         key: key,
@@ -116,17 +121,17 @@ const mr = function (config = { gid: "all" }) {
                         col: `${mrID}-out`,
                       })
                     );
-                })
-                .then(() => {
-                  require("fs").rmSync(
-                    require("path").join(nodeDir, gid, `${mrID}-map`),
-                    { recursive: true, force: true }
-                  );
-                  require("fs").rmSync(
-                    require("path").join(nodeDir, gid, `${mrID}-reduce`),
-                    { recursive: true, force: true }
-                  );
                 });
+            })
+            .then(() => {
+              // require("fs").rmSync(
+              //   require("path").join(nodeDir, gid, `${mrID}-map`),
+              //   { recursive: true, force: true }
+              // );
+              // require("fs").rmSync(
+              //   require("path").join(nodeDir, gid, `${mrID}-reduce`),
+              //   { recursive: true, force: true }
+              // );
             })
             .then(() => cb(err, null))
             .catch((e) => cb(e, null));
@@ -157,7 +162,7 @@ const mr = function (config = { gid: "all" }) {
             if (true) {
               mapRem.node = group[sid];
               distribution.local.comm.send(
-                [keyPartition[sid], context.gid, mrID],
+                [keyPartition[sid], context.gid, col, mrID],
                 mapRem,
                 (e, v) => {
                   if (e && e.length > 0) {
@@ -167,7 +172,7 @@ const mr = function (config = { gid: "all" }) {
                   if (cnt == numNodes) {
                     let shufRem = { service: mrID, method: "shuffle" };
                     distribution[context.gid].comm.send(
-                      [context.gid, mrID],
+                      [context.gid, col, mrID],
                       shufRem,
                       (e, v) => {
                         if (e && e.length > 0) {
@@ -175,7 +180,7 @@ const mr = function (config = { gid: "all" }) {
                         }
                         let redRem = { service: mrID, method: "reduce" };
                         distribution[context.gid].comm.send(
-                          [context.gid, mrID],
+                          [context.gid, col, mrID],
                           redRem,
                           (e, v) => {
                             distribution[context.gid].routes.del(
