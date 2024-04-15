@@ -25,26 +25,24 @@ const mr = function (config = { gid: 'all' }) {
           if (keys.length > 0) {
             let err = [];
             let cnt = 0;
-            let waitFor = keys.length;
             keys.forEach((key) => {
               distribution[gid].store.get({ key: key }, (e, val) => {
                 err.push(e);
                 let res = this.mapper(key, val);
-                waitFor += res.length;
+                let innerCnt = 0;
                 res.forEach(out => {
                   let [outKey, outVal] = Object.entries(out)[0];
                   distribution.local.store.append(outVal, { key: outKey, gid: gid, col: `${mrID}-map` }, (e, v) => {
                     err.push(e);
-                    cnt++;
-                    if (cnt == waitFor) {
+                    innerCnt++;
+                    if (innerCnt == res.length) {
+                      cnt++;
+                    }
+                    if (cnt == keys.length) {
                       cb(err, null);
                     }
                   });
                 });
-                cnt++;
-                if (cnt == waitFor) {
-                  cb(err, null);
-                }
               });
             });
           } else {
@@ -59,10 +57,10 @@ const mr = function (config = { gid: 'all' }) {
               let cnt = 0;
               keys.forEach(key => {
                 distribution.local.store.get({ key: key, gid: gid, col: `${mrID}-map` }, (e, vals) => {
-                  cnt++;
                   err.push(e);
                   distribution[gid].store.extend(vals, { key: key, gid: gid, col: `${mrID}-reduce` }, (e, v) => {
                     err.push(e);
+                    cnt++;
                     if (cnt == keys.length) {
                       cb(err, null);
                     }
@@ -90,13 +88,13 @@ const mr = function (config = { gid: 'all' }) {
                   cnt++;
                   if (cnt == keys.length) {
                     require('fs').rmSync(require('path').join(nodeDir, gid, `${mrID}-map`), { recursive: true, force: true });
-                    require('fs').rmSync(require('path').join(nodeDir, gid, `${mrID}-map`), { recursive: true, force: true });
+                    require('fs').rmSync(require('path').join(nodeDir, gid, `${mrID}-reduce`), { recursive: true, force: true });
                     cb(err, out);
                   }
                 }));
             } else {
               require('fs').rmSync(require('path').join(nodeDir, gid, `${mrID}-map`), { recursive: true, force: true });
-              require('fs').rmSync(require('path').join(nodeDir, gid, `${mrID}-map`), { recursive: true, force: true });
+              require('fs').rmSync(require('path').join(nodeDir, gid, `${mrID}-reduce`), { recursive: true, force: true });
               cb(null, null);
             }
           });
