@@ -2,15 +2,27 @@ const { PromisePool } = require("@supercharge/promise-pool");
 const args = require("yargs").argv;
 const { start, promisify } = require("./lib");
 
-const main = (server, interName) => {
-  // key="doc1", value=bodyStr
-  const map = (key, value, cb) => { 
-    const words = value.split(/\s+/);
-    const termCount = words.reduce((count, word) => {
-        return count + (word === term ? 1 : 0);
-    }, 0);
-    const tf = termCount / words.length;
-    cb([[key, {"docName": docName, "tf": tf}]]);
+const indexTf = (interName) => {
+  // key="doc1", value={body:"", description:""}
+  const map = (key, value, cb) => {
+    // process text
+    const text = value.body + value.description;
+    text.toLowerCase().match(/\b\w+\b/g);
+
+    // get each word frequency
+    const wordFrequency = {};
+    words.forEach(word => {
+        wordFrequency[word] = (wordFrequency[word] || 0) + 1;
+    });
+
+    // push TF score for each word
+    const totalWords = words.length;
+    const tfScores = [];
+    Object.keys(wordFrequency).forEach(word => {
+        const tf = wordFrequency[word] / totalWords;
+        tfScores.push({"docName": key, "tf": tf})
+    });
+    cb([tfScores]);
   };
 
   // key="word", value=[(doc1, tf), (doc2, tf)...]
@@ -36,7 +48,7 @@ const main = (server, interName) => {
       console.log(v.length);
     })
     .catch((e) => console.error(e))
-    .finally(() => server.close());
+    // .finally(() => server.close());
 };
 
-start(args.nodesConfig || "data/nodesConfig.json", main);
+module.exports = {indexTf};

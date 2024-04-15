@@ -1,8 +1,9 @@
 const { PromisePool } = require("@supercharge/promise-pool");
 const args = require("yargs").argv;
 const { start, promisify } = require("./lib");
+const { indexTf } = require("./index_tf");
 
-const main = (server) => {
+const main = (server, arg=null) => {
   const map = (key, value, state, cb) => {
     const limiter = state.getLimiter();
     const promiseRetry = require("promise-retry");
@@ -72,9 +73,9 @@ const main = (server) => {
         },
       })
     )
-    .then((v) => promisify(distribution.main.store.get)(v))
+    // .then((v) => promisify(distribution.main.store.get)(v))
     .then((v) => {
-      console.log(v.length);
+      indexTf(v);
     })
     .catch((e) => console.error(e))
     .finally(() => server.close());

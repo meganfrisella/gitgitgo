@@ -2,10 +2,10 @@ const { PromisePool } = require("@supercharge/promise-pool");
 const args = require("yargs").argv;
 const { start, promisify } = require("./lib");
 
-const main = (server) => {
+const indexIdf = (interName) => {
   // key="word", value=[(doc1, tf), (doc2, tf)...]
   const map = (key, value, cb) => { 
-    const totalDocs = 0; // TODO: total doc num? 
+    const totalDocs = 10; // TODO: total doc num? 
     const docsWithTerm = value.length;
     const idf = Math.log((totalDocs + 1) / (docsWithTerm + 1));
     const docName = value[0];
@@ -42,7 +42,7 @@ const main = (server) => {
       console.log(v.length);
     })
     .catch((e) => console.error(e))
-    .finally(() => server.close());
+    // .finally(() => server.close());
 };
 
-start(args.nodesConfig || "data/nodesConfig.json", main);
+module.exports = {indexIdf};
