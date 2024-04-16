@@ -1,14 +1,10 @@
 const { promisify } = require("./lib");
 
 const indexTf = (interName, megaCb) => {
-  // key="doc1", value={body:"", description:""}
-  const map = (key, value, state, cb) => {
-    console.log("tfMappppp")
+  const map = (docid, content, state, cb) => {
     // process text
-    let text = value.body + value.description;
-    text = text.toLowerCase().match(/\b\w+\b/g);
-
-    const words = text.split(/\s+/);
+    let text = content.body + content.description;
+    const words = text.toLowerCase().match(/\b\w+\b/g);
 
     // get each word frequency
     const wordFrequency = {};
@@ -21,15 +17,26 @@ const indexTf = (interName, megaCb) => {
     const tfScores = [];
     Object.keys(wordFrequency).forEach(word => {
         const tf = wordFrequency[word] / totalWords;
-        tfScores.push({"docName": key, "tf": tf})
+        tfScores.push([word, {"docid": docid, "tf": tf}]);
     });
-    console.log(tfScores)
-    cb([tfScores]);
+
+    cb(tfScores);
   };
 
   // key="word", value=[(doc1, tf), (doc2, tf)...]
   const reduce = (key, values, state, cb) => {
-    cb(values[0]);
+    console.log('in tfReduce, key:', key, 'values:', values);
+    const seenDocIds = {};
+    const out = [];
+    values.forEach(value => {
+      const docid = value.docid;
+      if (!(docid in seenDocIds)) {
+        out.push(value);
+        seenDocIds[docid] = true;
+      }
+    });
+
+    cb(out);
   };
   
   promisify(distribution.main.store.get)({
@@ -49,7 +56,7 @@ const indexTf = (interName, megaCb) => {
     .catch((e) => {
       console.error(e);
       megaCb(e, null);
-    })
+    });
 };
 
 module.exports = {indexTf};
