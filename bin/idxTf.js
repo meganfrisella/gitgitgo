@@ -25,7 +25,6 @@ const indexTf = (interName, megaCb) => {
 
   // key="word", value=[(doc1, tf), (doc2, tf)...]
   const reduce = (key, values, state, cb) => {
-    console.log('in tfReduce, key:', key, 'values:', values);
     const seenDocIds = {};
     const out = [];
     values.forEach(value => {
