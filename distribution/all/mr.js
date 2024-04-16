@@ -11,12 +11,13 @@ const mr = function (config = { gid: "all" }) {
     exec: (mrConfig, cb = defaultCallback) => {
       const mrID = `mr-${crypto.randomUUID()}`;
       const col = mrConfig.col || "default";
+      const out = mrConfig.out || `${mrID}-out`;
       mrSvc = {
         state: mrConfig.state || {},
         mapper: mrConfig.map,
         reducer: mrConfig.reduce,
 
-        map: function (keys, gid, col, mrID, cb = function () {}) {
+        map: function (keys, gid, col, out, mrID, cb = function () {}) {
           const { PromisePool } = require("@supercharge/promise-pool");
           const { promisify, promisifySingle } = require("../util/util.js");
           let err = [];
@@ -51,7 +52,7 @@ const mr = function (config = { gid: "all" }) {
             });
         },
 
-        shuffle: function (gid, col, mrID, cb = function () {}) {
+        shuffle: function (gid, col, out, mrID, cb = function () {}) {
           const { PromisePool } = require("@supercharge/promise-pool");
           const { promisify, promisifySingle } = require("../util/util.js");
 
@@ -83,7 +84,7 @@ const mr = function (config = { gid: "all" }) {
             .catch((e) => cb(e, null));
         },
 
-        reduce: function (gid, col, mrID, cb = function () {}) {
+        reduce: function (gid, col, out, mrID, cb = function () {}) {
           const { PromisePool } = require("@supercharge/promise-pool");
           const { promisify, promisifySingle } = require("../util/util.js");
           const nodeDir = require("path").join(
@@ -114,20 +115,20 @@ const mr = function (config = { gid: "all" }) {
                       promisify(distribution.local.store.put)(res, {
                         key: key,
                         gid: gid,
-                        col: `${mrID}-out`,
+                        col: out,
                       })
                     );
                 });
             })
             .then(() => {
-              // require("fs").rmSync(
-              //   require("path").join(nodeDir, gid, `${mrID}-map`),
-              //   { recursive: true, force: true }
-              // );
-              // require("fs").rmSync(
-              //   require("path").join(nodeDir, gid, `${mrID}-reduce`),
-              //   { recursive: true, force: true }
-              // );
+              require("fs").rmSync(
+                require("path").join(nodeDir, gid, `${mrID}-map`),
+                { recursive: true, force: true }
+              );
+              require("fs").rmSync(
+                require("path").join(nodeDir, gid, `${mrID}-reduce`),
+                { recursive: true, force: true }
+              );
             })
             .then(() => cb(err, null))
             .catch((e) => cb(e, null));
@@ -158,7 +159,7 @@ const mr = function (config = { gid: "all" }) {
             if (true) {
               mapRem.node = group[sid];
               distribution.local.comm.send(
-                [keyPartition[sid], context.gid, col, mrID],
+                [keyPartition[sid], context.gid, col, out, mrID],
                 mapRem,
                 (e, v) => {
                   if (e && e.length > 0) {
@@ -168,7 +169,7 @@ const mr = function (config = { gid: "all" }) {
                   if (cnt == numNodes) {
                     let shufRem = { service: mrID, method: "shuffle" };
                     distribution[context.gid].comm.send(
-                      [context.gid, col, mrID],
+                      [context.gid, col, out, mrID],
                       shufRem,
                       (e, v) => {
                         if (e && e.length > 0) {
@@ -176,14 +177,14 @@ const mr = function (config = { gid: "all" }) {
                         }
                         let redRem = { service: mrID, method: "reduce" };
                         distribution[context.gid].comm.send(
-                          [context.gid, col, mrID],
+                          [context.gid, col, out, mrID],
                           redRem,
                           (e, v) => {
                             distribution[context.gid].routes.del(
                               mrID,
                               (e, v) => {
                                 cb(null, {
-                                  col: `${mrID}-out`,
+                                  col: out,
                                   gid: context.gid,
                                   key: null,
                                 });

@@ -1,8 +1,6 @@
-const { PromisePool } = require("@supercharge/promise-pool");
-const args = require("yargs").argv;
-const { start, promisify } = require("./lib");
+const { promisify } = require("./lib");
 
-const main = (server) => {
+const crawler = (cb) => {
   const map = (key, value, state, cb) => {
     const limiter = state.getLimiter();
     const promiseRetry = require("promise-retry");
@@ -29,21 +27,14 @@ const main = (server) => {
       }
     )
       .then((body) => {
-        cb([
-          [
-            key,
-            {
-              body,
-              description: value.description,
-            },
-          ],
-        ]);
+        cb([[key, { body, description: value.description }]]);
       })
       .catch((e) => {
         console.error(e);
         cb([]);
       });
   };
+
   const reduce = (key, values, state, cb) => {
     cb(values[0]);
   };
@@ -56,6 +47,7 @@ const main = (server) => {
       promisify(distribution.main.mr.exec)({
         keys: v,
         col: "urls",
+        out: "docs",
         map,
         reduce,
         state: {
@@ -72,12 +64,11 @@ const main = (server) => {
         },
       })
     )
-    .then((v) => promisify(distribution.main.store.get)(v))
-    .then((v) => {
-      console.log(v.length);
-    })
-    .catch((e) => console.error(e))
-    .finally(() => server.close());
+    .then((v) => cb(null, v))
+    .catch((e) => {
+      console.error(e);
+      cb(e, null);
+    });
 };
 
-start(args.nodesConfig || "data/nodesConfig.json", main);
+module.exports = { crawler };
