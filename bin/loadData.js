@@ -6,9 +6,6 @@ const args = require("yargs").argv;
 
 const filename = args._[0];
 const repositories = JSON.parse(fs.readFileSync(filename, "utf8"));
-const numDocs = repositories.length;
-fs.writeFileSync("./numDocs.json", numDocs.toString(), { flag: 'w+' });
-console.log(`Loaded ${repositories.length} URLs from file`);
 
 const main = (server) => {
   PromisePool.for(repositories)

@@ -1,6 +1,6 @@
 const { promisify } = require("./lib");
 
-const indexTf = (interName, megaCb) => {
+const indexTf = (cb) => {
   const map = (docid, content, state, cb) => {
     // process text
     let text = content.body + content.description;
@@ -8,16 +8,16 @@ const indexTf = (interName, megaCb) => {
 
     // get each word frequency
     const wordFrequency = {};
-    words.forEach(word => {
-        wordFrequency[word] = (wordFrequency[word] || 0) + 1;
+    words.forEach((word) => {
+      wordFrequency[word] = (wordFrequency[word] || 0) + 1;
     });
 
     // push TF score for each word
     const totalWords = words.length;
     const tfScores = [];
-    Object.keys(wordFrequency).forEach(word => {
-        const tf = wordFrequency[word] / totalWords;
-        tfScores.push([word, {"docid": docid, "tf": tf}]);
+    Object.keys(wordFrequency).forEach((word) => {
+      const tf = wordFrequency[word] / totalWords;
+      tfScores.push([word, { docid: docid, tf: tf }]);
     });
 
     cb(tfScores);
@@ -27,7 +27,7 @@ const indexTf = (interName, megaCb) => {
   const reduce = (key, values, state, cb) => {
     const seenDocIds = {};
     const out = [];
-    values.forEach(value => {
+    values.forEach((value) => {
       const docid = value.docid;
       if (!(docid in seenDocIds)) {
         out.push(value);
@@ -37,25 +37,27 @@ const indexTf = (interName, megaCb) => {
 
     cb(out);
   };
-  
+  const inputCol = "docs";
+  const outCol = "tf";
   promisify(distribution.main.store.get)({
     key: null,
-    col: interName,
+    col: inputCol,
   })
     .then((v) =>
       promisify(distribution.main.mr.exec)({
         keys: v,
-        col: interName,
+        col: inputCol,
+        out: outCol,
         map,
         reduce,
         state: {},
       })
     )
-    .then((v) => megaCb(null, v))
+    .then((v) => cb(null, v))
     .catch((e) => {
       console.error(e);
-      megaCb(e, null);
+      cb(e, null);
     });
 };
 
-module.exports = {indexTf};
+module.exports = { indexTf };

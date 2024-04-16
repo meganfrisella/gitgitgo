@@ -1,51 +1,48 @@
 const { promisify } = require("./lib");
 
-const indexIdf = (interName, megaCb) => {
+const indexIdf = (nDocs, cb) => {
   // key="word", value=[(doc1, tf), (doc2, tf)...]
 
   const map = (key, value, state, cb) => {
-    const totalDocs = parseInt(fs.readFileSync("./numDocs.json", "utf8"));
+    const nDocs = state.nDocs;
     const docsWithTerm = value.length;
-    const idf = Math.log((totalDocs + 1) / (docsWithTerm + 1));
+    const idf = Math.log((nDocs + 1) / (docsWithTerm + 1));
 
     const ret = [];
     for (let i = 0; i < value.length; i++) {
       const entry = value[i];
-      ret.push([key, {"docName": entry.docid, "tfidf": entry.tf * idf}]);
-      if (i == value.length - 1) {
-        cb(ret);
-      }
+      ret.push([key, { docName: entry.docid, tfidf: entry.tf * idf }]);
     }
+    cb(ret);
   };
 
   // key="word", value=[(doc1, tfidf), (doc2, tfidf)...]
   const reduce = (key, values, state, cb) => {
     cb(values.sort((a, b) => b.tfidf - a.tfidf));
   };
-  
+  const inputCol = "tf";
+  const outputCol = "tfidf";
   promisify(distribution.main.store.get)({
     key: null,
-    col: interName,
+    col: inputCol,
   })
     .then((v) =>
       promisify(distribution.main.mr.exec)({
         keys: v,
-        col: interName,
+        col: inputCol,
+        out: outputCol,
         map,
         reduce,
         state: {
-          getLimiter: () => {
-            if (!this.limiter)
-              this.limiter = new Bottleneck({ maxConcurrent: 10 });
-          },
+          nDocs,
         },
       })
     )
-    .then((v) => megaCb(null, v))
+    .then((v) => cb(null, v))
     .catch((e) => {
       console.error(e);
-      megaCb(e, null);
-    })
+      cb(e, null);
+    });
 };
 
-module.exports = {indexIdf};
+module.exports = { indexIdf };

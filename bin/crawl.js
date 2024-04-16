@@ -1,6 +1,6 @@
 const { promisify } = require("./lib");
 
-const crawler = (megaCb) => {
+const crawler = (cb) => {
   const map = (key, value, state, cb) => {
     const limiter = state.getLimiter();
     const promiseRetry = require("promise-retry");
@@ -27,9 +27,7 @@ const crawler = (megaCb) => {
       }
     )
       .then((body) => {
-        cb([
-          [key, { body, description: value.description }],
-        ]);
+        cb([[key, { body, description: value.description }]]);
       })
       .catch((e) => {
         console.error(e);
@@ -49,6 +47,7 @@ const crawler = (megaCb) => {
       promisify(distribution.main.mr.exec)({
         keys: v,
         col: "urls",
+        out: "docs",
         map,
         reduce,
         state: {
@@ -65,11 +64,11 @@ const crawler = (megaCb) => {
         },
       })
     )
-    .then((v) => megaCb(null, v))
+    .then((v) => cb(null, v))
     .catch((e) => {
       console.error(e);
-      megaCb(e, null);
-    })
+      cb(e, null);
+    });
 };
 
-module.exports = {crawler};
+module.exports = { crawler };
