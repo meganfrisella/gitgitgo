@@ -11,6 +11,7 @@ function getID(obj) {
 
 // The NID is the SHA256 hash of the JSON representation of the node
 function getNID(node) {
+  if (node.nid) return node.nid;
   node = { ip: node.ip, port: node.port };
   return getID(node);
 }

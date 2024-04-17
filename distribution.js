@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-const util = require('./distribution/util/util.js');
-const args = require('yargs').argv;
-global.https = require('https');
+const util = require("./distribution/util/util.js");
+const args = require("yargs").argv;
+global.https = require("https");
 
 // Default configuration
 global.nodeConfig = global.nodeConfig || {
-  ip: '127.0.0.1',
+  ip: "127.0.0.1",
   port: 8080,
   onStart: () => {
-    console.log('Node started!');
+    console.log("Node started!");
   },
 };
 
@@ -30,32 +30,41 @@ if (args.port) {
   global.nodeConfig.port = parseInt(args.port);
 }
 
+if (args.nid) {
+  global.nodeConfig.nid = args.nid;
+}
+
 if (args.config) {
   let nodeConfig = util.deserialize(args.config);
   global.nodeConfig.ip = nodeConfig.ip ? nodeConfig.ip : global.nodeConfig.ip;
-  global.nodeConfig.port = nodeConfig.port ?
-    nodeConfig.port : global.nodeConfig.port;
-  global.nodeConfig.onStart = nodeConfig.onStart ?
-    nodeConfig.onStart : global.nodeConfig.onStart;
+  global.nodeConfig.port = nodeConfig.port
+    ? nodeConfig.port
+    : global.nodeConfig.port;
+  global.nodeConfig.nid = nodeConfig.nid
+    ? nodeConfig.nid
+    : global.nodeConfig.nid;
+  global.nodeConfig.onStart = nodeConfig.onStart
+    ? nodeConfig.onStart
+    : global.nodeConfig.onStart;
 }
 
 const distribution = {
-  util: require('./distribution/util/util.js'),
-  local: require('./distribution/local/local.js'),
-  node: require('./distribution/local/node.js'),
+  util: require("./distribution/util/util.js"),
+  local: require("./distribution/local/local.js"),
+  node: require("./distribution/local/node.js"),
 };
 
 global.distribution = distribution;
 
 distribution.all = {
-  comm: require('./distribution/all/comm.js')(),
-  groups: require('./distribution/all/groups.js')(),
-  status: require('./distribution/all/status.js')(),
-  routes: require('./distribution/all/routes.js')(),
-  gossip: require('./distribution/all/gossip.js')(),
-  mem: require('./distribution/all/mem.js')(),
-  store: require('./distribution/all/store.js')(),
-  mr: require('./distribution/all/mr.js')(),
+  comm: require("./distribution/all/comm.js")(),
+  groups: require("./distribution/all/groups.js")(),
+  status: require("./distribution/all/status.js")(),
+  routes: require("./distribution/all/routes.js")(),
+  gossip: require("./distribution/all/gossip.js")(),
+  mem: require("./distribution/all/mem.js")(),
+  store: require("./distribution/all/store.js")(),
+  mr: require("./distribution/all/mr.js")(),
 };
 
 module.exports = global.distribution;

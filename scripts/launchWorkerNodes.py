@@ -13,6 +13,7 @@ with open(args.config, 'r') as f:
 
 for node in data:
     print("Launching worker node", node['ip'])
-    os.system(f"./scripts/launchWorkerNode.sh {node['ip']} {node['port']} &")
+    os.system(
+        f"./scripts/launchWorkerNode.sh {node['ip']} {node['port']} {node['nid']} &")
 
 os.system("wait")

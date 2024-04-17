@@ -2,6 +2,7 @@
 
 import os
 import json
+import hashlib
 
 os.environ['AWS_PAGER'] = 'cat'
 data = os.popen(
@@ -9,7 +10,8 @@ data = os.popen(
 ips = json.loads(data)
 config = [{
     'ip': ip['Public'],
-    'port': 2345
+    'port': 2345,
+    'nid': hashlib.sha256(ip['Private'].encode()).hexdigest()
 } for ip in ips if ip['Public'] is not None]
 
 with open('data/nodesConfig.json', 'w') as f:
