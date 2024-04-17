@@ -2,21 +2,25 @@ const { promisify } = require("./lib");
 
 const indexTf = (cb) => {
   const map = (docid, content, state, cb) => {
+    // content = content[0]; // this is because I messed up the crawl a little
     // process text
-    let text = content.body + content.description;
+    let text = content.body;
+    if (content.description) {
+      text = `${text} ${content.description}`;
+    }
     const words = text.toLowerCase().match(/\b\w+\b/g);
 
     // get each word frequency
-    const wordFrequency = {};
+    const wordFrequency = new Map();
     words.forEach((word) => {
-      wordFrequency[word] = (wordFrequency[word] || 0) + 1;
+      wordFrequency.set(word, (wordFrequency.get(word) || 0) + 1);
     });
 
     // push TF score for each word
     const totalWords = words.length;
     const tfScores = [];
-    Object.keys(wordFrequency).forEach((word) => {
-      const tf = wordFrequency[word] / totalWords;
+    wordFrequency.forEach((count, word) => {
+      const tf = count / totalWords;
       tfScores.push([word, { docid: docid, tf: tf }]);
     });
 

@@ -25,8 +25,9 @@ const mr = function (config = { gid: "all" }) {
             .withConcurrency(10)
             .handleError((e) => err.push(e))
             .process((key) =>
-              promisify(distribution[gid].store.get)({
+              promisify(distribution.local.store.get)({
                 key: key,
+                gid,
                 col,
               })
                 .then((v) => promisifySingle(this.mapper)(key, v, this.state))
