@@ -19,7 +19,8 @@ comm.send = function (msg, rem, cb = defaultCallback) {
       data += chunk;
     });
     res.on("end", () => {
-      const [e, v] = serialization.deserialize(data);
+      const deserialized = serialization.deserialize(data);
+      const [e, v] = deserialized;
       cb(e, v);
     });
   });

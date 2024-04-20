@@ -21,32 +21,45 @@ const mr = function (config = { gid: "all" }) {
           const { PromisePool } = require("@supercharge/promise-pool");
           const { promisify, promisifySingle } = require("../util/util.js");
           let err = [];
-          PromisePool.for(keys)
-            .withConcurrency(10)
-            .handleError((e) => err.push(e))
-            .process((key) =>
-              promisify(distribution.local.store.get)({
-                key: key,
-                gid,
-                col,
-              })
-                .then((v) => promisifySingle(this.mapper)(key, v, this.state))
-                .then((res) => {
-                  return PromisePool.for(res)
-                    .withConcurrency(2)
-                    .handleError((e) => err.push(e))
-                    .process((out) => {
-                      let [outKey, outVal] = out;
-                      return promisify(distribution.local.store.append)(
-                        outVal,
-                        {
-                          key: outKey,
-                          gid,
-                          col: `${mrID}-map`,
-                        }
-                      );
-                    });
+          const keysPromise =
+            keys === null
+              ? promisify(distribution.local.store.get)({
+                  key: null,
+                  gid,
+                  col,
                 })
+              : Promise.resolve(keys);
+          keysPromise
+            .then((keys) =>
+              PromisePool.for(keys)
+                .withConcurrency(10)
+                .handleError((e) => err.push(e))
+                .process((key) =>
+                  promisify(distribution.local.store.get)({
+                    key: key,
+                    gid,
+                    col,
+                  })
+                    .then((v) =>
+                      promisifySingle(this.mapper)(key, v, this.state)
+                    )
+                    .then((res) => {
+                      return PromisePool.for(res)
+                        .withConcurrency(2)
+                        .handleError((e) => err.push(e))
+                        .process((out) => {
+                          let [outKey, outVal] = out;
+                          return promisify(distribution.local.store.append)(
+                            outVal,
+                            {
+                              key: outKey,
+                              gid,
+                              col: `${mrID}-map`,
+                            }
+                          );
+                        });
+                    })
+                )
             )
             .then(() => {
               cb(err, null);
@@ -137,6 +150,13 @@ const mr = function (config = { gid: "all" }) {
       };
 
       const partitionKeys = function (keys, group) {
+        if (keys === null) {
+          let out = {};
+          Object.keys(group).forEach((nid) => {
+            out[nid] = null;
+          });
+          return out;
+        }
         let out = {};
         Object.keys(group).forEach((nid) => {
           out[nid] = [];
@@ -157,48 +177,43 @@ const mr = function (config = { gid: "all" }) {
           let mapRem = { service: mrID, method: "map" };
 
           for (let sid in group) {
-            if (true) {
-              mapRem.node = group[sid];
-              distribution.local.comm.send(
-                [keyPartition[sid], context.gid, col, out, mrID],
-                mapRem,
-                (e, v) => {
-                  if (e && e.length > 0) {
-                    console.error(e);
-                  }
-                  ++cnt;
-                  if (cnt == numNodes) {
-                    let shufRem = { service: mrID, method: "shuffle" };
-                    distribution[context.gid].comm.send(
-                      [context.gid, col, out, mrID],
-                      shufRem,
-                      (e, v) => {
-                        if (e && e.length > 0) {
-                          console.error(e);
-                        }
-                        let redRem = { service: mrID, method: "reduce" };
-                        distribution[context.gid].comm.send(
-                          [context.gid, col, out, mrID],
-                          redRem,
-                          (e, v) => {
-                            distribution[context.gid].routes.del(
-                              mrID,
-                              (e, v) => {
-                                cb(null, {
-                                  col: out,
-                                  gid: context.gid,
-                                  key: null,
-                                });
-                              }
-                            );
-                          }
-                        );
-                      }
-                    );
-                  }
+            mapRem.node = group[sid];
+            distribution.local.comm.send(
+              [keyPartition[sid], context.gid, col, out, mrID],
+              mapRem,
+              (e, v) => {
+                if (e && e.length > 0) {
+                  console.error(e);
                 }
-              );
-            }
+                ++cnt;
+                if (cnt == numNodes) {
+                  let shufRem = { service: mrID, method: "shuffle" };
+                  distribution[context.gid].comm.send(
+                    [context.gid, col, out, mrID],
+                    shufRem,
+                    (e, v) => {
+                      if (e && e.length > 0) {
+                        console.error(e);
+                      }
+                      let redRem = { service: mrID, method: "reduce" };
+                      distribution[context.gid].comm.send(
+                        [context.gid, col, out, mrID],
+                        redRem,
+                        (e, v) => {
+                          distribution[context.gid].routes.del(mrID, (e, v) => {
+                            cb(null, {
+                              col: out,
+                              gid: context.gid,
+                              key: null,
+                            });
+                          });
+                        }
+                      );
+                    }
+                  );
+                }
+              }
+            );
           }
         });
       });

@@ -33,7 +33,7 @@ const start = function (onStart) {
     // Write some code...
 
     if (req.method !== "PUT") {
-      res.end(serialization.serialize(new Error("Method not allowed!")));
+      res.end(serialization.serialize([new Error("Method not allowed!")]));
       return;
     }
 
@@ -74,7 +74,7 @@ const start = function (onStart) {
       let error;
 
       if ((error = isValidBody(body))) {
-        res.end(serialization.serialize(error));
+        res.end(serialization.serialize([error]));
         return;
       }
 
@@ -87,8 +87,7 @@ const start = function (onStart) {
 
       local.routes.get(service, (error, svc) => {
         if (error) {
-          res.end(serialization.serialize(error));
-          console.error(error);
+          res.end(serialization.serialize([error]));
           return;
         }
 

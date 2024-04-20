@@ -134,7 +134,7 @@ test("(25 pts) all.mr:ncdc", (done) => {
       }
 
       distribution.ncdc.mr.exec(
-        { keys: v, map: m1, reduce: r1 },
+        { keys: null, map: m1, reduce: r1 },
         (e, distribKey) => {
           distribution.ncdc.store.get(distribKey, (e, keys) => {
             let cnt = 0;

@@ -22,22 +22,16 @@ const indexIdf = (nDocs, cb) => {
   };
   const inputCol = "tf";
   const outputCol = "tfidf";
-  promisify(distribution.main.store.get)({
-    key: null,
+  promisify(distribution.main.mr.exec)({
+    keys: null,
     col: inputCol,
+    out: outputCol,
+    map,
+    reduce,
+    state: {
+      nDocs,
+    },
   })
-    .then((v) =>
-      promisify(distribution.main.mr.exec)({
-        keys: v,
-        col: inputCol,
-        out: outputCol,
-        map,
-        reduce,
-        state: {
-          nDocs,
-        },
-      })
-    )
     .then((v) => cb(null, v))
     .catch((e) => {
       console.error(e);

@@ -39,31 +39,25 @@ const crawler = (cb) => {
     cb(values[0]);
   };
 
-  promisify(distribution.main.store.get)({
-    key: null,
+  promisify(distribution.main.mr.exec)({
+    keys: null,
     col: "urls",
-  })
-    .then((v) =>
-      promisify(distribution.main.mr.exec)({
-        keys: v,
-        col: "urls",
-        out: "docs",
-        map,
-        reduce,
-        state: {
-          getLimiter: () => {
-            const Bottleneck = require("bottleneck/es5");
-            if (!this.limiter) {
-              const nRequestsPerHour = 4000;
-              const minTime = 1000 / (nRequestsPerHour / 60 / 60);
-              this.limiter = new Bottleneck({ minTime });
-            }
+    out: "docs",
+    map,
+    reduce,
+    state: {
+      getLimiter: () => {
+        const Bottleneck = require("bottleneck/es5");
+        if (!this.limiter) {
+          const nRequestsPerHour = 4000;
+          const minTime = 1000 / (nRequestsPerHour / 60 / 60);
+          this.limiter = new Bottleneck({ minTime });
+        }
 
-            return this.limiter;
-          },
-        },
-      })
-    )
+        return this.limiter;
+      },
+    },
+  })
     .then((v) => cb(null, v))
     .catch((e) => {
       console.error(e);

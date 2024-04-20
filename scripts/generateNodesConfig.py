@@ -13,6 +13,7 @@ config = [{
     'port': 2345,
     'nid': hashlib.sha256(ip['Private'].encode()).hexdigest()
 } for ip in ips if ip['Public'] is not None]
+config.sort(key=lambda x: x['nid'])
 
 with open('data/nodesConfig.json', 'w') as f:
     json.dump(config, f, indent=2)

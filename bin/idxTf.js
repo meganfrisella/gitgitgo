@@ -2,6 +2,7 @@ const { promisify } = require("./lib");
 
 const indexTf = (cb) => {
   const map = (docid, content, state, cb) => {
+    const natural = require("natural");
     // content = content[0]; // this is because I messed up the crawl a little
     // process text
     let text = content.body;
@@ -13,6 +14,8 @@ const indexTf = (cb) => {
     // get each word frequency
     const wordFrequency = new Map();
     words.forEach((word) => {
+      word = natural.PorterStemmer.stem(word);
+      if (word.length > 150) return;
       wordFrequency.set(word, (wordFrequency.get(word) || 0) + 1);
     });
 
@@ -43,20 +46,14 @@ const indexTf = (cb) => {
   };
   const inputCol = "docs";
   const outCol = "tf";
-  promisify(distribution.main.store.get)({
-    key: null,
+  promisify(distribution.main.mr.exec)({
+    keys: null,
     col: inputCol,
+    out: outCol,
+    map,
+    reduce,
+    state: {},
   })
-    .then((v) =>
-      promisify(distribution.main.mr.exec)({
-        keys: v,
-        col: inputCol,
-        out: outCol,
-        map,
-        reduce,
-        state: {},
-      })
-    )
     .then((v) => cb(null, v))
     .catch((e) => {
       console.error(e);

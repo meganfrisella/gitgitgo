@@ -6,19 +6,17 @@ const distribution = require("./distribution");
 const args = require("yargs").argv;
 
 const main = (server) => {
-  // promisify(crawler)().then((res) =>
-  promisify(indexTf)()
-    .then((res) =>
-      promisify(distribution.main.store.get)({
-        key: null,
-        col: "docs",
-      })
-    )
+  // promisify(crawler)()
+  //   .then((res) => promisify(indexTf)())
+  //   .then((res) =>
+  promisify(distribution.main.store.get)({
+    key: null,
+    col: "docs",
+  })
+    // )
+    .then((res) => promisify(indexIdf)(res.length))
     .then((res) => {
-      return promisify(indexIdf)(res.length);
-    })
-    .then((res) => {
-      console.log("res: ", res);
+      console.log(res);
     })
     .catch(console.error)
     .finally(() => server.close());
