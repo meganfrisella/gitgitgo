@@ -1,10 +1,10 @@
 const { promisify } = require("./lib");
 
-const query = (res, word, cb) => {
+const query = (word, cb) => {
   // key="word", value=[(doc1, tfidf), (doc2, tfidf)...]
   promisify(distribution.main.store.get)({
     key: word,
-    col: res,
+    col: "tfidf",
   })
     .then((value) => {
         let ret = '';
