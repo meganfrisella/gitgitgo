@@ -20,6 +20,7 @@ const mr = function (config = { gid: "all" }) {
         map: function (keys, gid, col, out, mrID, cb = function () {}) {
           const { PromisePool } = require("@supercharge/promise-pool");
           const { promisify, promisifySingle } = require("../util/util.js");
+          let count = 0;
           let err = [];
           const keysPromise =
             keys === null
@@ -34,8 +35,12 @@ const mr = function (config = { gid: "all" }) {
               PromisePool.for(keys)
                 .withConcurrency(10)
                 .handleError((e) => err.push(e))
-                .process((key) =>
-                  promisify(distribution.local.store.get)({
+                .process((key) => {
+                  if (count % 100 === 0) {
+                    console.log(`Mapping ${count} / ${keys.length} keys`);
+                  }
+                  count += 1;
+                  return promisify(distribution.local.store.get)({
                     key: key,
                     gid,
                     col,
@@ -58,8 +63,8 @@ const mr = function (config = { gid: "all" }) {
                             }
                           );
                         });
-                    })
-                )
+                    });
+                })
             )
             .then(() => {
               cb(err, null);
@@ -71,6 +76,7 @@ const mr = function (config = { gid: "all" }) {
           const { promisify, promisifySingle } = require("../util/util.js");
 
           let err = [];
+          let count = 0;
           promisify(distribution.local.store.get)({
             key: null,
             gid: gid,
@@ -81,6 +87,10 @@ const mr = function (config = { gid: "all" }) {
                 .withConcurrency(10)
                 .handleError((e) => err.push(e))
                 .process((key) => {
+                  if (count % 100 === 0) {
+                    console.log(`Shuffling ${count} / ${keys.length} keys`);
+                  }
+                  count += 1;
                   return promisify(distribution.local.store.get)({
                     key: key,
                     gid: gid,
@@ -106,6 +116,7 @@ const mr = function (config = { gid: "all" }) {
             "../../store",
             global.moreStatus.sid
           );
+          let count = 0;
           let err = [];
           promisify(distribution.local.store.get)({
             key: null,
@@ -117,7 +128,11 @@ const mr = function (config = { gid: "all" }) {
                 .withConcurrency(10)
                 .handleError((e) => err.push(e))
                 .process((key) => {
-                  promisify(distribution.local.store.get)({
+                  if (count % 100 === 0) {
+                    console.log(`Reducing ${count} / ${keys.length} keys`);
+                  }
+                  count += 1;
+                  return promisify(distribution.local.store.get)({
                     key: key,
                     gid: gid,
                     col: `${mrID}-reduce`,
@@ -182,9 +197,9 @@ const mr = function (config = { gid: "all" }) {
               [keyPartition[sid], context.gid, col, out, mrID],
               mapRem,
               (e, v) => {
-                if (e && e.length > 0) {
-                  console.error(e);
-                }
+                // if (e && e.length > 0) {
+                //   console.error(e);
+                // }
                 ++cnt;
                 if (cnt == numNodes) {
                   let shufRem = { service: mrID, method: "shuffle" };
@@ -192,9 +207,9 @@ const mr = function (config = { gid: "all" }) {
                     [context.gid, col, out, mrID],
                     shufRem,
                     (e, v) => {
-                      if (e && e.length > 0) {
-                        console.error(e);
-                      }
+                      // if (e && e.length > 0) {
+                      //   console.error(e);
+                      // }
                       let redRem = { service: mrID, method: "reduce" };
                       distribution[context.gid].comm.send(
                         [context.gid, col, out, mrID],

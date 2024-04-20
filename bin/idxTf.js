@@ -12,6 +12,7 @@ const indexTf = (cb) => {
       text += " " + content.description;
     }
     let words = text.toLowerCase().match(/\b\w+\b/g);
+    words = words || [];
 
     // get each word frequency
     const wordFrequency = new Map();
