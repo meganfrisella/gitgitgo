@@ -7,13 +7,13 @@ const args = require("yargs").argv;
 
 const main = (server) => {
   // promisify(crawler)()
-  //   .then((res) => promisify(indexTf)())
-  //   .then((res) =>
-  promisify(distribution.main.store.get)({
-    key: null,
-    col: "docs",
-  })
-    // )
+  promisify(indexTf)()
+    .then((res) =>
+      promisify(distribution.main.store.get)({
+        key: null,
+        col: "docs",
+      })
+    )
     .then((res) => promisify(indexIdf)(res.length))
     .then((res) => {
       console.log(res);

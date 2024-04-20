@@ -3,13 +3,15 @@ const { promisify } = require("./lib");
 const indexTf = (cb) => {
   const map = (docid, content, state, cb) => {
     const natural = require("natural");
-    // content = content[0]; // this is because I messed up the crawl a little
     // process text
-    let text = content.body;
-    if (content.description) {
-      text = `${text} ${content.description}`;
+    let text = "";
+    if (content.body) {
+      text += content.body;
     }
-    const words = text.toLowerCase().match(/\b\w+\b/g);
+    if (content.description) {
+      text += " " + content.description;
+    }
+    let words = text.toLowerCase().match(/\b\w+\b/g);
 
     // get each word frequency
     const wordFrequency = new Map();
