@@ -14,6 +14,7 @@ const fs = require("fs");
 const path = require("path");
 const id = require("../util/id");
 const serialization = require("../util/serialization");
+const readlines = require("n-readlines");
 
 const store = {};
 
@@ -51,12 +52,25 @@ store.get = function (conf, cb = defaultCallback) {
   } else {
     const file = getFilePath(conf.gid, conf.col, key);
     try {
-      const data = fs.readFileSync(file).toString();
-      const substrings = data.split("\n");
-      if (substrings.length > 1) {
-        cb(null, substrings.slice(0, -1).map(serialization.deserialize));
+      if (conf.k) {
+        const liner = new readlines(file);
+        let line;
+        let lineCount = 0;
+        const data = [];
+        while ((line = liner.next())) {
+          if (lineCount === conf.k) break;
+          data.push(serialization.deserialize(line.toString()));
+          lineCount++;
+        }
+        cb(null, data);
       } else {
-        cb(null, serialization.deserialize(data));
+        const data = fs.readFileSync(file).toString();
+        const substrings = data.split("\n");
+        if (substrings.length > 1) {
+          cb(null, substrings.slice(0, -1).map(serialization.deserialize));
+        } else {
+          cb(null, serialization.deserialize(data));
+        }
       }
     } catch (err) {
       cb(new Error("store.get " + err.toString()), null);

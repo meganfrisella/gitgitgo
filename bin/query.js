@@ -13,6 +13,7 @@ const query = (q, k, cb) => {
       promisify(distribution.main.store.get)({
         key: word,
         col: "tfidf",
+        k: k,
       }).catch((err) => [])
     )
   )
