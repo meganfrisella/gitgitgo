@@ -17,6 +17,7 @@ const comm = (config = { gid: "all" }) => {
           rem.node = group[sid];
           localComm.send(msg, rem, (e, v) => {
             ++cnt;
+            console.log(`${cnt} / ${numNodes} nodes`);
             if (v) {
               nodeToValue[sid] = v;
             }

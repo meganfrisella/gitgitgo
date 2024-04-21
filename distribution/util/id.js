@@ -21,21 +21,6 @@ function getSID(node) {
   return getNID(node).substring(0, 5);
 }
 
-const hexToModuloN = (hex, n) => {
-  let result = 0;
-
-  // Process each character in the hex string
-  for (let i = 0; i < hex.length; i++) {
-    let char = hex[i];
-
-    let digitValue = parseInt(char, 16);
-
-    result = (result * 16 + digitValue) % n;
-  }
-
-  return result;
-};
-
 function idToNum(id) {
   let n = BigInt("0x" + id);
   return n;

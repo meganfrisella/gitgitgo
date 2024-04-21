@@ -3,7 +3,7 @@ const { start, promisify } = require("./../bin/lib");
 const distribution = require("./../distribution");
 const args = require("yargs").argv;
 
-const evalCrawl = (server) => {
+const evalCrawl = () => {
   const t0 = performance.now();
   promisify(crawler)()
     .then((res) =>
@@ -17,8 +17,7 @@ const evalCrawl = (server) => {
       console.log(`item processed: ${res.length}`);
       console.log(`execution time: ${t1 - t0}`);
     })
-    .catch(console.error)
-    .finally(() => server.close());
+    .catch(console.error);
 };
 
 start(args.nodesConfig || "data/nodesConfig.json", evalCrawl);

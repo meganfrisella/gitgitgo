@@ -7,7 +7,7 @@ const args = require("yargs").argv;
 const filename = args._[0];
 const repositories = JSON.parse(fs.readFileSync(filename, "utf8"));
 
-const main = (server) => {
+const main = () => {
   PromisePool.for(repositories)
     .withConcurrency(100)
     .handleError(console.error)
@@ -41,8 +41,7 @@ const main = (server) => {
     .then((v) => {
       console.log(`Put ${v.length} URLs in distributed store`);
       console.log(v.slice(0, 10));
-    })
-    .finally(() => server.close());
+    });
 };
 
 start(args.nodesConfig || "data/nodesConfig.json", main);

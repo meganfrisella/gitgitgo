@@ -23,7 +23,7 @@ const promisify = (f) => {
   };
 };
 
-const start = (nodesConfigPath, main) => {
+const start = (nodesConfigPath, main, local = false) => {
   const groupName = "main";
   const config = JSON.parse(fs.readFileSync(nodesConfigPath));
   const group = {};
@@ -33,13 +33,14 @@ const start = (nodesConfigPath, main) => {
   const groupConfig = {
     gid: groupName,
   };
-  distribution.node.start((server) => {
-    promisify(groupsTemplate(groupConfig).put)(groupConfig, group)
-      .then((v) => {
-        main(server);
-      })
-      .catch(console.error);
-  });
+  const putGroups = local
+    ? promisify(distribution.local.groups.put)(groupName, group)
+    : promisify(groupsTemplate(groupConfig).put)(groupConfig, group);
+  putGroups
+    .then((v) => {
+      main();
+    })
+    .catch(console.error);
 };
 
 module.exports = {

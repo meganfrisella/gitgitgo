@@ -5,7 +5,7 @@ const args = require("yargs").argv;
 
 const word = "function";
 
-const evalQuery = (server) => {
+const evalQuery = () => {
   const t0 = performance.now();
   promisify(query)(word)
     .then((res) => {
@@ -13,8 +13,7 @@ const evalQuery = (server) => {
       console.log(`query time: ${t1 - t0}`);
       console.log(res);
     })
-    .catch(console.error)
-    .finally(() => server.close());
+    .catch(console.error);
 };
 
 start(args.nodesConfig || "data/nodesConfig.json", evalQuery);

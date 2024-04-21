@@ -34,7 +34,6 @@ const store = (config = { gid: "all", hash: id.naiveHash }) => {
           return cb(null, allEntries);
         });
       }
-
       const kid = id.getID(key);
       const group = global.nodeState.groupsStore.get(context.gid);
       const nid = context.hash(kid, Object.keys(group));

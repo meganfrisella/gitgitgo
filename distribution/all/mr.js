@@ -63,7 +63,8 @@ const mr = function (config = { gid: "all" }) {
                             }
                           );
                         });
-                    });
+                    })
+                    .then(() => {});
                 })
             )
             .then(() => {
@@ -95,13 +96,15 @@ const mr = function (config = { gid: "all" }) {
                     key: key,
                     gid: gid,
                     col: `${mrID}-map`,
-                  }).then((vals) =>
-                    promisify(distribution[gid].store.extend)(vals, {
-                      key: key,
-                      gid: gid,
-                      col: `${mrID}-reduce`,
-                    })
-                  );
+                  })
+                    .then((vals) =>
+                      promisify(distribution[gid].store.extend)(vals, {
+                        key: key,
+                        gid: gid,
+                        col: `${mrID}-reduce`,
+                      })
+                    )
+                    .then(() => {});
                 })
             )
             .then(() => cb(err, null))
@@ -126,7 +129,10 @@ const mr = function (config = { gid: "all" }) {
             .then((keys) => {
               return PromisePool.for(keys)
                 .withConcurrency(10)
-                .handleError((e) => err.push(e))
+                .handleError((e) => {
+                  err.push(e);
+                  console.log(e);
+                })
                 .process((key) => {
                   if (count % 100 === 0) {
                     console.log(`Reducing ${count} / ${keys.length} keys`);
@@ -146,7 +152,8 @@ const mr = function (config = { gid: "all" }) {
                         gid: gid,
                         col: out,
                       })
-                    );
+                    )
+                    .then((res) => {});
                 });
             })
             .then(() => {
@@ -187,7 +194,7 @@ const mr = function (config = { gid: "all" }) {
       distribution[context.gid].routes.put(mrSvc, mrID, (e, v) => {
         distribution.local.groups.get(context.gid, (e, group) => {
           let keyPartition = partitionKeys(mrConfig.keys, group);
-          var cnt = 0;
+          let mapCount = 0;
           const numNodes = Object.keys(group).length;
           let mapRem = { service: mrID, method: "map" };
 
@@ -200,8 +207,9 @@ const mr = function (config = { gid: "all" }) {
                 // if (e && e.length > 0) {
                 //   console.error(e);
                 // }
-                ++cnt;
-                if (cnt == numNodes) {
+                mapCount += 1;
+                console.log(`Mapped ${mapCount} / ${numNodes} nodes`);
+                if (mapCount == numNodes) {
                   let shufRem = { service: mrID, method: "shuffle" };
                   distribution[context.gid].comm.send(
                     [context.gid, col, out, mrID],
@@ -215,6 +223,9 @@ const mr = function (config = { gid: "all" }) {
                         [context.gid, col, out, mrID],
                         redRem,
                         (e, v) => {
+                          // if (e && e.length > 0) {
+                          //   console.error(e);
+                          // }
                           distribution[context.gid].routes.del(mrID, (e, v) => {
                             cb(null, {
                               col: out,
