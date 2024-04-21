@@ -40,7 +40,7 @@ module.exports = { query };
 
 const main = () => {
   const t0 = performance.now();
-  promisify(query)(args._[0], 10)
+  promisify(query)(args._[0], args.k ? parseInt(args.k) : 10)
     .then((hits) => {
       const t1 = performance.now();
       console.log(`Top ${hits.length} hits for query: ${args._[0]}`);
