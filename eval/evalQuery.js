@@ -7,7 +7,7 @@ const word = "function";
 
 const evalQuery = () => {
   const t0 = performance.now();
-  promisify(query)(word)
+  promisify(query)(word, 5)
     .then((res) => {
       const t1 = performance.now();
       console.log(`query time: ${t1 - t0}`);
